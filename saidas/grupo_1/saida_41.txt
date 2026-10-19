@@ -1,0 +1,25 @@
+=== RELATÓRIO DO EXPERIMENTO DE CARREGAMENTO ===
+Dimensões do Contêiner: 615 x 410 x 410
+Total de itens alocados: 21
+--------------------------------------------------
+Caixa ID: 624 | Pos (x,y,z): (0, 0, 0) | Dimensões usadas: (193, 195, 202)
+Caixa ID: 813 | Pos (x,y,z): (0, 195, 0) | Dimensões usadas: (192, 192, 201)
+Caixa ID: 208 | Pos (x,y,z): (0, 0, 202) | Dimensões usadas: (189, 197, 198)
+Caixa ID: 399 | Pos (x,y,z): (0, 197, 202) | Dimensões usadas: (188, 192, 199)
+Caixa ID: 492 | Pos (x,y,z): (202, 0, 0) | Dimensões usadas: (187, 193, 197)
+Caixa ID: 257 | Pos (x,y,z): (202, 193, 0) | Dimensões usadas: (162, 199, 199)
+Caixa ID: 339 | Pos (x,y,z): (202, 0, 197) | Dimensões usadas: (148, 193, 172)
+Caixa ID: 9 | Pos (x,y,z): (202, 193, 199) | Dimensões usadas: (161, 198, 199)
+Caixa ID: 726 | Pos (x,y,z): (350, 0, 197) | Dimensões usadas: (49, 193, 91)
+Caixa ID: 71 | Pos (x,y,z): (202, 0, 369) | Dimensões usadas: (76, 193, 41)
+Caixa ID: 490 | Pos (x,y,z): (350, 0, 288) | Dimensões usadas: (41, 162, 122)
+Caixa ID: 59 | Pos (x,y,z): (278, 0, 369) | Dimensões usadas: (71, 81, 41)
+Caixa ID: 809 | Pos (x,y,z): (278, 81, 369) | Dimensões usadas: (59, 59, 41)
+Caixa ID: 227 | Pos (x,y,z): (278, 140, 369) | Dimensões usadas: (65, 51, 41)
+Caixa ID: 486 | Pos (x,y,z): (399, 0, 0) | Dimensões usadas: (155, 199, 205)
+Caixa ID: 413 | Pos (x,y,z): (554, 0, 0) | Dimensões usadas: (50, 190, 205)
+Caixa ID: 305 | Pos (x,y,z): (399, 199, 0) | Dimensões usadas: (177, 187, 187)
+Caixa ID: 870 | Pos (x,y,z): (399, 0, 205) | Dimensões usadas: (160, 178, 205)
+Caixa ID: 449 | Pos (x,y,z): (399, 199, 187) | Dimensões usadas: (154, 197, 201)
+Caixa ID: 868 | Pos (x,y,z): (559, 0, 205) | Dimensões usadas: (44, 177, 182)
+Caixa ID: 983 | Pos (x,y,z): (553, 199, 187) | Dimensões usadas: (49, 188, 204)

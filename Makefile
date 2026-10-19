@@ -2,6 +2,9 @@ CXX      := g++
 CXXFLAGS := -Iheaders -std=c++17 -Wall -Wextra
 BUILD    := build
 
+# Grupo usado pelos alvos grupo/grafico (make grupo GRUPO=escala)
+GRUPO ?= escala
+
 # Código compartilhado (sem main)
 LIB_SRCS := $(wildcard cpps/*.cpp)
 LIB_OBJS := $(LIB_SRCS:cpps/%.cpp=$(BUILD)/%.o)
@@ -15,7 +18,7 @@ TEST_SRCS := $(wildcard test/*.cpp)
 TEST_OBJS := $(TEST_SRCS:test/%.cpp=$(BUILD)/test_%.o)
 TEST      := $(BUILD)/run_tests
 
-.PHONY: all run test visual clean
+.PHONY: all run test visual grupo grafico clean
 
 all: $(APP)
 
@@ -31,6 +34,18 @@ test: $(TEST)
 visual: $(APP)
 	./$(APP) $(if $(ID),rodar $(ID),demo) > /dev/null
 	python3 visual/gerar_visualizacao.py saidas/saida_$(if $(ID),$(ID),demo).txt
+
+# Cria e roda um grupo de 50 instâncias com dimensões crescentes
+#   make grupo GRUPO=escala
+# Cada instância i usa pacotes entre 1*i e 5*i e contêiner 15*i x 10*i x 10*i.
+grupo: $(APP)
+	./$(APP) criar-grupo $(GRUPO) 50 20 1 5 15 10 10
+	./$(APP) rodar-grupo $(GRUPO)
+
+# Gera a imagem do desempenho do grupo (a partir de desempenho.csv)
+#   make grafico GRUPO=escala  ->  visual/desempenho_escala.svg
+grafico:
+	python3 visual/gerar_grafico_desempenho.py instances/$(GRUPO)
 
 # Executável principal
 $(APP): $(MAIN_OBJ) $(LIB_OBJS)

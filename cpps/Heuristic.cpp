@@ -19,6 +19,8 @@ struct LayerCandidate {
 GreedyHeuristic::GreedyHeuristic(Container cont, std::vector<Package> pkgs)
     : container(cont), packages(pkgs) {}
 
+void GreedyHeuristic::set_verbose(bool value) { verbose = value; }
+
 double GreedyHeuristic::cavity_degree(int x, int y, int z, int dx, int dy,
                                       int dz) {
   double c_i;  // Cavity Degree variable
@@ -108,7 +110,9 @@ double GreedyHeuristic::cavity_degree(int x, int y, int z, int dx, int dy,
   // 4 - Calculate the ad_i
   ad_i = std::exp((double)(-d_i) / cbrt((double)dx * dy * dz));
 
-  std::cout << r_i << " " << d_i << " " << ad_i << " " << k_i;
+  if (verbose) {
+    std::cout << r_i << " " << d_i << " " << ad_i << " " << k_i;
+  }
 
   // 5 - Lastly calculate the c_i
   c_i = (100 * (double)k_i) + (10 * ad_i) + (double)r_i;
@@ -149,9 +153,11 @@ void GreedyHeuristic::execute() {
     // 2 - Sort the candidates basead on the volume and the depth
     std::sort(candidates.begin(), candidates.end(), comp_candidates);
 
-    std::cout << " Sorted layer candidates: " << std::endl;
-    for (const auto &c : candidates) {
-      std::cout << c.pkg.id << std::endl;
+    if (verbose) {
+      std::cout << " Sorted layer candidates: " << std::endl;
+      for (const auto &c : candidates) {
+        std::cout << c.pkg.id << std::endl;
+      }
     }
 
     // 3 - Define the current layer
@@ -176,13 +182,17 @@ void GreedyHeuristic::execute() {
       int cy = get<1>(next_corner);
       int cz = get<2>(next_corner);
 
-      std::cout << " Inserting package in the corner " << cx << " " << cy << " "
-                << cz << std::endl;
+      if (verbose) {
+        std::cout << " Inserting package in the corner " << cx << " " << cy
+                  << " " << cz << std::endl;
+      }
 
       for (auto i{0}; i < (int)unallocated.size(); ++i) {
         auto &pkg = unallocated[i];
 
-        std::cout << " Testing package: " << pkg.id << std::endl;
+        if (verbose) {
+          std::cout << " Testing package: " << pkg.id << std::endl;
+        }
         for (const auto &ori : pkg.get_valid_orientations()) {
           int dx = get<0>(ori);
           int dy = get<1>(ori);
@@ -197,7 +207,9 @@ void GreedyHeuristic::execute() {
           if (container.space_available(cx, cy, cz, ori)) {
             double cavity = cavity_degree(cx, cy, cz, dx, dy, dz);
 
-            std::cout << " - Cavity Degree: " << cavity << std::endl;
+            if (verbose) {
+              std::cout << " - Cavity Degree: " << cavity << std::endl;
+            }
 
             // 4.2.3 - If necessary update the best package
             if (cavity > max_cavity_degree) {
@@ -234,10 +246,12 @@ void GreedyHeuristic::execute() {
       corners.erase(std::remove(corners.begin(), corners.end(), next_corner),
                     corners.end());
 
-      std::cout << " Corners left: " << std::endl;
-      for (auto c : corners) {
-        std::cout << get<0>(c) << "," << get<1>(c) << "," << get<2>(c)
-                  << std::endl;
+      if (verbose) {
+        std::cout << " Corners left: " << std::endl;
+        for (auto c : corners) {
+          std::cout << get<0>(c) << "," << get<1>(c) << "," << get<2>(c)
+                    << std::endl;
+        }
       }
     }
 
@@ -262,13 +276,15 @@ void GreedyHeuristic::generate_resume(std::string archive_name) {
     return;
   }
 
-  std::cout << "=== RELATÓRIO DO EXPERIMENTO DE CARREGAMENTO ===" << std::endl;
-  std::cout << "Dimensões do Contêiner: " << container.c << " x " << container.l
-            << " x " << container.a << std::endl;
-  std::cout << "Total de itens alocados: "
-            << container.allocated_packages.size() << std::endl;
-  std::cout << "--------------------------------------------------"
-            << std::endl;
+  if (verbose) {
+    std::cout << "=== RELATÓRIO DO EXPERIMENTO DE CARREGAMENTO ===" << std::endl;
+    std::cout << "Dimensões do Contêiner: " << container.c << " x "
+              << container.l << " x " << container.a << std::endl;
+    std::cout << "Total de itens alocados: "
+              << container.allocated_packages.size() << std::endl;
+    std::cout << "--------------------------------------------------"
+              << std::endl;
+  }
 
   archive << "=== RELATÓRIO DO EXPERIMENTO DE CARREGAMENTO ===\n";
   archive << "Dimensões do Contêiner: " << container.c << " x " << container.l
@@ -284,11 +300,15 @@ void GreedyHeuristic::generate_resume(std::string archive_name) {
         ", " + std::to_string(package.pos_z) + ")" + " | Dimensões usadas: (" +
         std::to_string(package.ori_c) + ", " + std::to_string(package.ori_l) +
         ", " + std::to_string(package.ori_a) + ")";
-    std::cout << line << std::endl;
+    if (verbose) {
+      std::cout << line << std::endl;
+    }
     archive << line << "\n";
   }
 
   archive.close();
-  std::cout << "\nRelatório salvo com sucesso no arquivo: " << archive_name
-            << std::endl;
+  if (verbose) {
+    std::cout << "\nRelatório salvo com sucesso no arquivo: " << archive_name
+              << std::endl;
+  }
 }

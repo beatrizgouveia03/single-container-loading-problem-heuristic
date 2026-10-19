@@ -1,0 +1,13 @@
+{
+    "container_base": [
+        15,
+        10,
+        10
+    ],
+    "grupo": "grupo_1",
+    "instancias": 50,
+    "max_base": 5,
+    "min_base": 1,
+    "pacotes": 1000,
+    "regra_crescimento": "iteracao i: pacotes [min*i, max*i], container * i nas tres dimensoes"
+}

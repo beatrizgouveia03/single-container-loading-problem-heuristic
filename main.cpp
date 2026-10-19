@@ -3,14 +3,24 @@
 //   criar <pacotes> <min> <max> <C> <L> <A>   cria uma instância aleatória
 //   listar                                    lista as instâncias salvas
 //   rodar <id>                                roda a heurística na instância <id>
+//   criar-grupo <nome> <n> <pacotes> <min> <max> <C> <L> <A>
+//                                             cria <n> instâncias em
+//                                             instances/<nome>/ crescendo as
+//                                             dimensões por iteração
+//   listar-grupos                             lista os grupos de instâncias
+//   listar-grupo <nome>                       lista as instâncias do grupo
+//   rodar-grupo <nome>                        roda o grupo inteiro e grava o
+//                                             desempenho por id
 //   demo                                      roda o exemplo embutido (15x10x10)
 //   ajuda                                     mostra os comandos
 //   sair                                      encerra
 //
-// Também aceita comandos fora do console: ./exec_trabalho rodar <id> ou
+// Também aceita comandos fora do console: ./exec_trabalho rodar <id>,
+// ./exec_trabalho rodar-grupo <nome>, ./exec_trabalho criar-grupo ... ou
 // ./exec_trabalho demo (útil para scripts e para o Makefile).
 
 #include "Container.h"
+#include "GroupRunner.h"
 #include "Heuristic.h"
 #include "InstanceManager.h"
 #include "Package.h"
@@ -56,6 +66,14 @@ static void print_help() {
        << "      Ex.: criar 10 2 5 15 10 10\n"
        << "  listar                    Lista as instâncias salvas.\n"
        << "  rodar <id>                Roda a heurística na instância <id>.\n"
+       << "  criar-grupo <nome> <n> <pacotes> <min> <max> <C> <L> <A>\n"
+       << "      Cria <n> instâncias em instances/<nome>/; a instância i usa\n"
+       << "      pacotes entre <min>*i e <max>*i e contêiner C*i x L*i x A*i.\n"
+       << "      Ex.: criar-grupo escala 50 20 1 5 15 10 10\n"
+       << "  listar-grupos             Lista os grupos e quantas instâncias têm.\n"
+       << "  listar-grupo <nome>       Lista as instâncias de um grupo.\n"
+       << "  rodar-grupo <nome>        Roda todas as instâncias do grupo e grava\n"
+       << "      instances/<nome>/desempenho.csv (volume por id).\n"
        << "  demo                      Roda o exemplo embutido (15x10x10).\n"
        << "  ajuda                     Mostra esta ajuda.\n"
        << "  sair                      Encerra o programa.\n";
@@ -146,6 +164,153 @@ static void cmd_listar(InstanceManager &manager) {
   }
 }
 
+static int cmd_listar_grupos(InstanceManager &manager) {
+  vector<string> groups = manager.listGroups();
+  if (groups.empty()) {
+    cout << "Nenhum grupo em " << manager.folder.string() << ".\n";
+    return 0;
+  }
+
+  cout << "Grupos em " << manager.folder.string() << ":\n";
+  int printed = 0;
+  for (const auto &group : groups) {
+    fs::path dir = manager.groupFolder(group);
+    vector<int> ids = manager.listIds(dir);
+    if (ids.empty()) {
+      continue; // pasta que não contém instâncias
+    }
+    cout << "  " << group << " | " << ids.size() << " instâncias";
+    if (fs::exists(dir / "desempenho.csv")) {
+      cout << " | desempenho.csv";
+    }
+    cout << "\n";
+    ++printed;
+  }
+  if (printed == 0) {
+    cout << "  (nenhum grupo com instâncias)\n";
+  }
+  return 0;
+}
+
+static int cmd_listar_grupo(InstanceManager &manager,
+                            const vector<string> &args) {
+  if (args.size() != 2) {
+    cerr << "Uso: listar-grupo <nome>\n";
+    return 1;
+  }
+
+  fs::path dir = manager.groupFolder(args[1]);
+  vector<int> ids = manager.listIds(dir);
+  if (ids.empty()) {
+    cerr << "Nenhuma instância no grupo '" << args[1] << "' (" << dir.string()
+         << ").\n";
+    return 1;
+  }
+
+  cout << "Instâncias do grupo '" << args[1] << "' em " << dir.string()
+       << ":\n";
+  for (int id : ids) {
+    Instance instance = manager.readInstance(dir, id);
+    cout << "  [" << id << "] ";
+    if (instance.packages.empty() && !instance.has_container()) {
+      cout << "(inválida ou ilegível)\n";
+      continue;
+    }
+    if (instance.has_container()) {
+      cout << "contêiner " << instance.c << "x" << instance.l << "x"
+           << instance.a << " | " << instance.packages.size() << " pacotes";
+    } else {
+      cout << "formato antigo, sem contêiner | " << instance.packages.size()
+           << " pacotes";
+    }
+    cout << "\n";
+  }
+  return 0;
+}
+
+static int cmd_criar_grupo(InstanceManager &manager,
+                           const vector<string> &args) {
+  if (args.size() != 9) {
+    cerr << "Uso: criar-grupo <nome> <n> <pacotes> <min> <max> <C> <L> <A>\n";
+    return 1;
+  }
+
+  const string &group = args[1];
+  int n_instances, n_packages, min_dim, max_dim, c, l, a;
+  if (!to_int(args[2], n_instances) || !to_int(args[3], n_packages) ||
+      !to_int(args[4], min_dim) || !to_int(args[5], max_dim) ||
+      !to_int(args[6], c) || !to_int(args[7], l) || !to_int(args[8], a)) {
+    cerr << "Erro: todos os argumentos após <nome> devem ser inteiros.\n";
+    return 1;
+  }
+  if (n_instances < 1) {
+    cerr << "Erro: o número de instâncias deve ser >= 1.\n";
+    return 1;
+  }
+  if (n_packages < 1) {
+    cerr << "Erro: o número de pacotes deve ser >= 1.\n";
+    return 1;
+  }
+  if (min_dim < 1 || max_dim < 1) {
+    cerr << "Erro: as dimensões dos pacotes devem ser >= 1.\n";
+    return 1;
+  }
+  if (max_dim < min_dim) {
+    cerr << "Erro: <max> deve ser maior ou igual a <min>.\n";
+    return 1;
+  }
+  if (c < 1 || l < 1 || a < 1) {
+    cerr << "Erro: as dimensões do contêiner devem ser >= 1.\n";
+    return 1;
+  }
+
+  vector<Instance> generated = manager.generateGroup(
+      group, n_instances, n_packages, min_dim, max_dim, c, l, a);
+  if (generated.empty()) {
+    return 1; // o motivo já foi impresso pelo generateGroup
+  }
+
+  long last = n_instances;
+  cout << "Grupo '" << group << "' criado em "
+       << manager.groupFolder(group).string() << "\n";
+  cout << "  instâncias: " << n_instances << ", pacotes por instância: "
+       << n_packages << "\n";
+  cout << "  regra: na iteração i, pacotes entre " << min_dim << "*i e "
+       << max_dim << "*i e contêiner " << c << "*i x " << l << "*i x " << a
+       << "*i\n";
+  cout << "  primeira: pacotes " << min_dim << ".." << max_dim
+       << ", contêiner " << c << "x" << l << "x" << a << "\n";
+  cout << "  última:   pacotes " << (long)min_dim * last << ".."
+       << (long)max_dim * last << ", contêiner " << (long)c * last << "x"
+       << (long)l * last << "x" << (long)a * last << "\n";
+  cout << "Para rodar as " << n_instances
+       << " de uma vez:  rodar-grupo " << group << "\n";
+  return 0;
+}
+
+static int cmd_rodar_grupo(InstanceManager &manager,
+                           const vector<string> &args) {
+  if (args.size() != 2) {
+    cerr << "Uso: rodar-grupo <nome>\n";
+    return 1;
+  }
+
+  GroupRunner runner;
+  GroupRunResult result = runner.run(manager, args[1]);
+  if (!result.ok()) {
+    return 1;
+  }
+
+  cout << "\n=== Desempenho do grupo '" << result.group << "' ===\n";
+  cout << "Instâncias executadas: " << result.instances.size() << "\n";
+  cout << fixed << setprecision(2);
+  cout << "Ocupação média: " << result.mean_occupancy << " %\n";
+  cout << "Desempenho por id: " << result.performance_file.string() << "\n";
+  cout << "Relatórios:        saidas/" << result.group << "/saida_<id>.txt\n";
+  cout << "Gráfico:           make grafico GRUPO=" << result.group << "\n";
+  return 0;
+}
+
 static int cmd_rodar(InstanceManager &manager, const vector<string> &args) {
   if (args.size() != 2) {
     cerr << "Uso: rodar <id>\n";
@@ -186,11 +351,8 @@ static int cmd_rodar(InstanceManager &manager, const vector<string> &args) {
   solver.generate_resume(report);
 
   const Container &result = solver.get_container();
-  long vol_total = (long)result.c * result.l * result.a;
-  long vol_used = 0;
-  for (const auto &pkg : result.allocated_packages) {
-    vol_used += (long)pkg.ori_c * pkg.ori_l * pkg.ori_a;
-  }
+  long vol_total = Utils::containerVolume(result);
+  long vol_used = Utils::usedVolume(result);
 
   cout << "\n=== Resultado ===\n";
   cout << "Alocados: " << result.allocated_packages.size() << " de "
@@ -231,12 +393,27 @@ int main(int argc, char *argv[]) {
       run_demo();
       return 0;
     }
-    if (args[0] == "rodar" && args.size() == 2) {
+    if (args[0] == "rodar") {
       return cmd_rodar(manager, args);
+    }
+    if (args[0] == "criar-grupo") {
+      return cmd_criar_grupo(manager, args);
+    }
+    if (args[0] == "rodar-grupo") {
+      return cmd_rodar_grupo(manager, args);
+    }
+    if (args[0] == "listar-grupos") {
+      return cmd_listar_grupos(manager);
+    }
+    if (args[0] == "listar-grupo") {
+      return cmd_listar_grupo(manager, args);
     }
     cerr << "Comando não interativo inválido. Uso:\n"
          << "  ./exec_trabalho demo\n"
-         << "  ./exec_trabalho rodar <id>\n";
+         << "  ./exec_trabalho rodar <id>\n"
+         << "  ./exec_trabalho criar-grupo <nome> <n> <pacotes> <min> <max> <C> "
+            "<L> <A>\n"
+         << "  ./exec_trabalho rodar-grupo <nome>\n";
     print_help();
     return 1;
   }
@@ -263,6 +440,14 @@ int main(int argc, char *argv[]) {
       cmd_listar(manager);
     } else if (cmd == "rodar") {
       cmd_rodar(manager, args);
+    } else if (cmd == "criar-grupo") {
+      cmd_criar_grupo(manager, args);
+    } else if (cmd == "rodar-grupo") {
+      cmd_rodar_grupo(manager, args);
+    } else if (cmd == "listar-grupos") {
+      cmd_listar_grupos(manager);
+    } else if (cmd == "listar-grupo") {
+      cmd_listar_grupo(manager, args);
     } else if (cmd == "demo") {
       run_demo();
     } else {
