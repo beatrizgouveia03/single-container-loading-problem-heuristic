@@ -1,6 +1,7 @@
 #include "Heuristic.h"
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 
@@ -245,8 +246,21 @@ void GreedyHeuristic::execute() {
   }
 }
 
+const Container &GreedyHeuristic::get_container() const { return container; }
+
 void GreedyHeuristic::generate_resume(std::string archive_name) {
+  // Garante que a pasta do relatório exista (ex.: saidas/saida_<id>.txt)
+  std::filesystem::path path(archive_name);
+  if (path.has_parent_path()) {
+    std::filesystem::create_directories(path.parent_path());
+  }
+
   std::ofstream archive(archive_name);
+  if (!archive) {
+    std::cerr << "\nErro: não foi possível abrir " << archive_name
+              << " para escrita." << std::endl;
+    return;
+  }
 
   std::cout << "=== RELATÓRIO DO EXPERIMENTO DE CARREGAMENTO ===" << std::endl;
   std::cout << "Dimensões do Contêiner: " << container.c << " x " << container.l

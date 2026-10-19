@@ -1,93 +1,203 @@
-# single-container-loading-problem-heuristic
+# Single Container Loading Problem — Heuristic
 
+A C++ implementation of a **greedy heuristic** for the Single Container Loading
+Problem: packing as much volume as possible of rectangular boxes into a
+container, respecting the container limits, without overlaps, and considering
+the 6 orientations of each box.
 
+The project comes with a **command console** to create instances and run the
+heuristic, per-instance **solution reports**, and an **interactive 3D
+visualization** of the solution in the browser.
 
-## Getting started
+---
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Table of Contents
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- [Requirements](#requirements)
+- [Building](#building)
+- [Usage — command console](#usage--command-console)
+- [Instance format](#instance-format)
+- [Output reports](#output-reports)
+- [3D visualization](#3d-visualization)
+- [Makefile targets](#makefile-targets)
 
-## Add your files
+---
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## Requirements
+
+| Tool | Tested version | Needed for |
+| --- | --- | --- |
+| `g++` (any C++17 compiler) | 11.4.0 | building the project |
+| `make` | 4.3 | build and helper targets |
+| `python3` | 3.10.12 | generating the 3D visualization |
+| Modern browser | any | opening the visualization |
+
+There are no external dependencies to build: the JSON parser
+([nlohmann/json](https://github.com/nlohmann/json)) is already in `lib/json.hpp`
+and the Three.js library used in the visualization is in `visual/vendor/`, so
+the scene works **offline**.
+
+## Building
+
+```bash
+make        # produces the ./exec_trabalho executable
+```
+
+The build uses `-std=c++17 -Wall -Wextra` and places object files in `build/`.
+To remove everything (objects, executable and reports):
+
+```bash
+make clean
+```
+
+## Usage — command console
+
+```bash
+make run            # or: ./exec_trabalho
+```
+
+Available commands (type `ajuda` in the console):
+
+| Command | Description |
+| --- | --- |
+| `criar <packages> <min> <max> <C> <L> <A>` | Creates an instance with `<packages>` packages of random dimensions between `<min>` and `<max>`, for a `C x L x A` container. E.g.: `criar 8 2 5 15 10 10` |
+| `listar` | Lists the instances saved in `instances/` with their container and number of packages |
+| `rodar <id>` | Loads instance `<id>`, runs the heuristic and writes the report to `saidas/saida_<id>.txt` |
+| `demo` | Runs the built-in example (15×10×10 container with 6 boxes) |
+| `ajuda` | Shows the help |
+| `sair` | Exits |
+
+> The command names and console messages are kept in Portuguese, as they are
+> in the program itself (`criar` = create, `listar` = list, `rodar` = run,
+> `ajuda` = help, `sair` = exit).
+
+Example session (the heuristic's debug output has been omitted):
+
+```console
+$ ./exec_trabalho
+=== Single Container Loading — console de testes ===
+Instâncias em: instances/
+Digite 'ajuda' para ver os comandos.
+
+> criar 8 2 5 15 10 10
+Instância 1 salva em instances/instance_1.json
+  contêiner: 15 x 10 x 10 (volume 1500)
+  pacotes:   8 com dimensões entre 2 e 5 (volume total 454)
+Para testar:  rodar 1
+> listar
+Instâncias em instances:
+  [1] contêiner 15x10x10 | 8 pacotes
+> rodar 1
+=== Instância 1 ===
+Contêiner: 15 x 10 x 10
+Pacotes:   8
+...
+=== Resultado ===
+Alocados: 8 de 8 pacotes
+Ocupação: 454/1500 u³ (30.3 %)
+Relatório: saidas/saida_1.txt (visualize com `make visual ID=1`)
+> sair
+```
+
+Commands can also be run outside the console (useful for scripts):
+
+```bash
+./exec_trabalho demo           # runs the built-in example and exits
+./exec_trabalho rodar <id>     # runs the heuristic on instance <id> and exits
+```
+
+## Instance format
+
+Each instance is stored in `instances/instance_<id>.json` and holds **the
+container dimensions and the dimensions of each package**:
+
+```json
+{
+    "container": [15, 10, 10],
+    "packages": [
+        [4, 4, 3],
+        [5, 2, 5],
+        [2, 2, 2]
+    ]
+}
+```
+
+- `container`: `[length, width, height]` of the container (integer units).
+- `packages`: list of `[l, w, h]` for each package. Ids are assigned by list
+  order (1, 2, 3, ...).
+
+Instances in the old format (only the list of packages, with no `container`) are
+still recognized by the reader, but **cannot be run** — `rodar` warns about it
+and asks you to recreate the instance with the `criar` command.
+
+## Output reports
+
+Each run writes a report to `saidas/`, numbered after the instance that produced
+the solution (`demo` uses `saidas/saida_demo.txt`):
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/beatrizgouveia03/single-container-loading-problem-heuristic.git
-git branch -M main
-git push -uf origin main
+saidas/
+├── saida_1.txt        # solution for instance 1
+├── saida_2.txt        # solution for instance 2
+└── saida_demo.txt     # solution for the built-in example
 ```
 
-## Integrate with your tools
+Report format — position in the `(x, y, z)` coordinate system with the origin at
+the container corner and dimensions already oriented (the report text itself is
+written in Portuguese by the program):
 
-* [Set up project integrations](https://gitlab.com/beatrizgouveia03/single-container-loading-problem-heuristic/-/settings/integrations)
+```
+=== RELATÓRIO DO EXPERIMENTO DE CARREGAMENTO ===
+Dimensões do Contêiner: 15 x 10 x 10
+Total de itens alocados: 6
+--------------------------------------------------
+Caixa ID: 106 | Pos (x,y,z): (0, 0, 0) | Dimensões usadas: (5, 5, 5)
+Caixa ID: 103 | Pos (x,y,z): (0, 5, 0) | Dimensões usadas: (2, 5, 4)
+Caixa ID: 101 | Pos (x,y,z): (0, 0, 5) | Dimensões usadas: (3, 6, 4)
+```
 
-## Collaborate with your team
+The `saidas/` folder is created automatically.
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+## 3D visualization
 
-## Test and Deploy
+The 3D scene (`visual/index.html`) shows the container filled with the solution
+from the report: colored boxes with their ID, edges, shadows, an interactive
+legend, a tooltip with position/dimensions, occupancy statistics, and controls
+for auto-rotation, IDs, walls and the initial view.
 
-Use the built-in continuous integration in GitLab.
+```bash
+make visual            # runs the built-in example and generates the scene from saidas/saida_demo.txt
+make visual ID=1       # runs the heuristic on instance 1 and generates the scene from saidas/saida_1.txt
+```
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+You can also generate the scene from any existing report, without running the
+heuristic:
 
-***
+```bash
+python3 visual/gerar_visualizacao.py saidas/saida_1.txt   # explicit path
+python3 visual/gerar_visualizacao.py                      # uses the most recent report in saidas/
+```
 
-# Editing this README
+The generator validates the solution (container bounds and overlaps) before
+writing the HTML. To open the scene, serve the project root with any static
+server and point the browser to `visual/index.html`:
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+```bash
+python3 -m http.server 8000
+# http://127.0.0.1:8000/visual/index.html
+```
 
-## Suggestions for a good README
+> The scene uses ES modules, so a static server (any one) is required instead of
+> opening the file with `file://`. The Three.js files are in `visual/vendor/`,
+> so no internet access is needed.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## Makefile targets
 
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+| Target | What it does |
+| --- | --- |
+| `make` / `make all` | Builds `./exec_trabalho` |
+| `make run` | Builds and opens the command console |
+| `make test` | Builds and runs the tests |
+| `make visual` | Runs `demo` and generates `visual/index.html` from its report |
+| `make visual ID=<n>` | Runs the heuristic on instance `<n>` and generates `visual/index.html` |
+| `make clean` | Removes `build/`, `exec_trabalho`, `saidas/` and `relatorio_saida.txt` |

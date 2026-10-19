@@ -17,6 +17,8 @@ private:
 public:
   GreedyHeuristic(Container cont, std::vector<Package> pkgs);
   void execute();
+  // Contêiner preenchido pela última execução (caixas alocadas).
+  const Container &get_container() const;
   void generate_resume(std::string archive = "relatorio_saida.txt");
 };
 

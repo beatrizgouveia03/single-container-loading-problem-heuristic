@@ -15,7 +15,7 @@ TEST_SRCS := $(wildcard test/*.cpp)
 TEST_OBJS := $(TEST_SRCS:test/%.cpp=$(BUILD)/test_%.o)
 TEST      := $(BUILD)/run_tests
 
-.PHONY: all run test clean
+.PHONY: all run test visual clean
 
 all: $(APP)
 
@@ -24,6 +24,13 @@ run: $(APP)
 
 test: $(TEST)
 	./$(TEST)
+
+# Gera a visualização 3D da solução em visual/index.html
+#   make visual        -> usa o exemplo embutido (demo)
+#   make visual ID=6   -> roda a heurística na instância 6 e usa o relatório dela
+visual: $(APP)
+	./$(APP) $(if $(ID),rodar $(ID),demo) > /dev/null
+	python3 visual/gerar_visualizacao.py saidas/saida_$(if $(ID),$(ID),demo).txt
 
 # Executável principal
 $(APP): $(MAIN_OBJ) $(LIB_OBJS)
@@ -49,6 +56,6 @@ $(BUILD):
 	mkdir -p $(BUILD)
 
 clean:
-	rm -rf $(BUILD) $(APP) relatorio_saida.txt
+	rm -rf $(BUILD) $(APP) saidas relatorio_saida.txt
 
 -include $(wildcard $(BUILD)/*.d)
