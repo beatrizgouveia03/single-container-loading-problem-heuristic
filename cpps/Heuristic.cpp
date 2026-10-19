@@ -146,6 +146,11 @@ void GreedyHeuristic::execute() {
     // 2 - Sort the candidates basead on the volume and the depth
     std::sort(candidates.begin(), candidates.end(), comp_candidates);
 
+    std::cout << " Sorted layer candidates: " << std::endl;
+    for (const auto c : candidates) {
+      std::cout << c.pkg.id << std::endl;
+    }
+
     // 3 - Define the current layer
     LayerCandidate curr_layer = candidates[0];
 
