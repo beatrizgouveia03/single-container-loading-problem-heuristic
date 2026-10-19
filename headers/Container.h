@@ -7,12 +7,12 @@
 
 class Container {
 public:
-  double c, l, a;
-  std::vector<Package> alocated_packages;
+  int c, l, a;
+  std::vector<Package> allocated_packages;
 
-  Container(double _c, double _l, double _a);
-  bool space_available(Package &package, double x, double y, double z,
-                       std::tuple<double, double, double> orientation);
+  Container(int _c, int _l, int _a);
+  bool space_available(Package &package, int x, int y, int z,
+                       std::tuple<int, int, int> orientation);
 };
 
 #endif

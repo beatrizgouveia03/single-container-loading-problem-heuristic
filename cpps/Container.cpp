@@ -1,25 +1,24 @@
 #include "Container.h"
 
-Container::Container(double _c, double _l, double _a) {
+Container::Container(int _c, int _l, int _a) {
   c = _c;
   l = _l;
   a = _a;
 }
 
-bool Container::space_available(
-    Package &package, double x, double y, double z,
-    std::tuple<double, double, double> orientation) {
-  double oc = std::get<0>(orientation);
-  double ol = std::get<1>(orientation);
-  double oa = std::get<2>(orientation);
+bool Container::space_available(Package &package, int x, int y, int z,
+                                std::tuple<int, int, int> orientation) {
+  int oc = std::get<0>(orientation);
+  int ol = std::get<1>(orientation);
+  int oa = std::get<2>(orientation);
 
   if (x + oc > c || y + ol > l || z + oa > a) {
     return false;
   }
 
-  for (const auto &item : alocated_packages) {
-    double ix = item.pos_x, iy = item.pos_y, iz = item.pos_z;
-    double ic = item.ori_c, il = item.ori_l, ia = item.ori_a;
+  for (const auto &pkg : allocated_packages) {
+    int ix = pkg.pos_x, iy = pkg.pos_y, iz = pkg.pos_z;
+    int ic = pkg.ori_c, il = pkg.ori_l, ia = pkg.ori_a;
 
     bool separated = (x + oc <= ix || x >= ix + ic || y + ol <= iy ||
                       y >= iy + il || z + oa <= iz || z >= iz + ia);

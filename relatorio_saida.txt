@@ -1,0 +1,5 @@
+=== RELATÓRIO DO EXPERIMENTO DE CARREGAMENTO ===
+Dimensões do Contêiner: 10 x 10 x 10
+Total de itens alocados: 1
+--------------------------------------------------
+Caixa ID: 1 | Pos (x,y,z): (0, 0, 0) | Dimensões usadas: (4, 4, 4)

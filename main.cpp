@@ -1,7 +1,6 @@
 #include "Container.h"
 #include "Heuristic.h"
 #include "Package.h"
-#include <vector>
 
 int main() {
   Container container(10, 10, 10);
