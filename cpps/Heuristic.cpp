@@ -122,7 +122,7 @@ bool comp_candidates(const LayerCandidate &a, LayerCandidate &b) {
 
 void GreedyHeuristic::execute() {
   std::vector<Package> unallocated = packages;
-  int x_offset = 0.0;
+  int x_offset = 0;
 
   while (x_offset < container.c && !unallocated.empty()) {
     // 1 - Find the layer candidates
@@ -154,7 +154,7 @@ void GreedyHeuristic::execute() {
     std::vector<std::tuple<int, int, int>> corners;
 
     // 4.1 - Initiate the corners' list with the origin(0,0,0)
-    corners.push_back({0, 0, 0});
+    corners.push_back({x_offset, 0, 0});
 
     // 4.2 - While there is a corner or a package was inserted, get the next
     // corner and calculate the best package to insert
@@ -171,23 +171,28 @@ void GreedyHeuristic::execute() {
       int cy = get<1>(next_corner);
       int cz = get<2>(next_corner);
 
+      std::cout << " Inserting package in the corner " << cx << " " << cy << " "
+                << cz << std::endl;
+
       for (auto i{0}; i < unallocated.size(); ++i) {
         auto &pkg = unallocated[i];
+
+        std::cout << " Testing package: " << pkg.id << std::endl;
         for (const auto &ori : pkg.get_valid_orientations()) {
           int dx = get<0>(ori);
           int dy = get<1>(ori);
           int dz = get<2>(ori);
 
-          // If the box is bigger than the layer discard
+          // 4.2.1 - If the box is bigger than the layer discard
           if (cx + dx > x_offset + curr_layer.depth) {
             continue;
           }
 
-          // Calculate the cavity degree of the package
+          // 4.2.2 - Calculate the cavity degree of the package
           if (container.space_available(pkg, cx, cy, cz, ori)) {
             double cavity = cavity_degree(pkg, cx, cy, cz, dx, dy, dz);
 
-            // If necessary update the best package
+            // 4.2.3 - If necessary update the best package
             if (cavity > max_cavity_degree) {
               max_cavity_degree = cavity;
               best_pkg_idx = (int)i;
@@ -197,7 +202,7 @@ void GreedyHeuristic::execute() {
         }
       }
 
-      // Add the best package to the container
+      // 4.3 - Add the best package to the container
       if (best_pkg_idx != -1) {
         Package best_pkg = unallocated[best_pkg_idx];
 
@@ -212,14 +217,20 @@ void GreedyHeuristic::execute() {
         container.allocated_packages.push_back(best_pkg);
         unallocated.erase(unallocated.begin() + best_pkg_idx);
 
-        // Remove the corners
+        // 4.4 - Remove the corners
         corners.erase(std::remove(corners.begin(), corners.end(), next_corner),
                       corners.end());
 
-        // Add the new corners created
+        // 4.5 - Add the new corners created
         corners.push_back({cx + best_pkg.ori_c, cy, cz});
         corners.push_back({cx, cy + best_pkg.ori_l, cz});
         corners.push_back({cx, cy, cz + best_pkg.ori_a});
+
+        std::cout << " Corners left: " << std::endl;
+        for (auto c : corners) {
+          std::cout << get<0>(c) << "," << get<1>(c) << "," << get<2>(c)
+                    << std::endl;
+        }
 
         package_inserted = true;
       }
