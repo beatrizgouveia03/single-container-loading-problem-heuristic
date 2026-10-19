@@ -101,14 +101,16 @@ double GreedyHeuristic::cavity_degree(const Package &pkg, int x, int y, int z,
   }
 
   // 3 - Calculate r_i and d_i
-  r_i = a_c / a_t;
-  d_i = (k_i > 0) ? 0 : 1;
+  r_i = (double)a_c / a_t;
+  d_i = (k_i > 0) ? 1 : 0;
 
   // 4 - Calculate the ad_i
   ad_i = std::exp((double)(-d_i) / cbrt((double)dx * dy * dz));
 
+  std::cout << r_i << " " << d_i << " " << ad_i << " " << k_i;
+
   // 5 - Lastly calculate the c_i
-  c_i = 100 * (double)k_i + 10 * ad_i + (double)r_i;
+  c_i = (100 * (double)k_i) + (10 * ad_i) + (double)r_i;
 
   return c_i;
 }
@@ -161,12 +163,9 @@ void GreedyHeuristic::execute() {
     // 4.1 - Initiate the corners' list with the origin(0,0,0)
     corners.push_back({x_offset, 0, 0});
 
-    // 4.2 - While there is a corner or a package was inserted, get the next
+    // 4.2 - While there is a corner or a package to be inserted, get the next
     // corner and calculate the best package to insert
-    bool package_inserted = true;
-    while (package_inserted && !corners.empty()) {
-      package_inserted = false;
-
+    while (!corners.empty() && !unallocated.empty()) {
       int best_pkg_idx = -1;
       std::tuple<int, int, int> best_ori;
       std::tuple<int, int, int> next_corner = corners[0];
@@ -197,6 +196,8 @@ void GreedyHeuristic::execute() {
           if (container.space_available(pkg, cx, cy, cz, ori)) {
             double cavity = cavity_degree(pkg, cx, cy, cz, dx, dy, dz);
 
+            std::cout << " - Cavity Degree: " << cavity << std::endl;
+
             // 4.2.3 - If necessary update the best package
             if (cavity > max_cavity_degree) {
               max_cavity_degree = cavity;
@@ -222,22 +223,20 @@ void GreedyHeuristic::execute() {
         container.allocated_packages.push_back(best_pkg);
         unallocated.erase(unallocated.begin() + best_pkg_idx);
 
-        // 4.4 - Remove the corners
-        corners.erase(std::remove(corners.begin(), corners.end(), next_corner),
-                      corners.end());
-
-        // 4.5 - Add the new corners created
+        // 4.4 - Add the new corners created
         corners.push_back({cx + best_pkg.ori_c, cy, cz});
         corners.push_back({cx, cy + best_pkg.ori_l, cz});
         corners.push_back({cx, cy, cz + best_pkg.ori_a});
+      }
 
-        std::cout << " Corners left: " << std::endl;
-        for (auto c : corners) {
-          std::cout << get<0>(c) << "," << get<1>(c) << "," << get<2>(c)
-                    << std::endl;
-        }
+      // 4.5 - Remove the corner tested
+      corners.erase(std::remove(corners.begin(), corners.end(), next_corner),
+                    corners.end());
 
-        package_inserted = true;
+      std::cout << " Corners left: " << std::endl;
+      for (auto c : corners) {
+        std::cout << get<0>(c) << "," << get<1>(c) << "," << get<2>(c)
+                  << std::endl;
       }
     }
 
