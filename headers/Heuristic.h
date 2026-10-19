@@ -12,8 +12,7 @@ private:
   Container container;
   std::vector<Package> packages;
 
-  double cavity_degree(const Package &pkg, int x, int y, int z, int dx, int dy,
-                       int dz);
+  double cavity_degree(int x, int y, int z, int dx, int dy, int dz);
 
 public:
   GreedyHeuristic(Container cont, std::vector<Package> pkgs);

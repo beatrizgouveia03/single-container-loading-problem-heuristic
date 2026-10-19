@@ -18,8 +18,8 @@ struct LayerCandidate {
 GreedyHeuristic::GreedyHeuristic(Container cont, std::vector<Package> pkgs)
     : container(cont), packages(pkgs) {}
 
-double GreedyHeuristic::cavity_degree(const Package &pkg, int x, int y, int z,
-                                      int dx, int dy, int dz) {
+double GreedyHeuristic::cavity_degree(int x, int y, int z, int dx, int dy,
+                                      int dz) {
   double c_i;  // Cavity Degree variable
   int k_i{0};  // Number of collages
   double ad_i; // Adjacency Degree
@@ -133,7 +133,7 @@ void GreedyHeuristic::execute() {
     for (auto &pkg : unallocated) {
       for (const auto &ori : pkg.get_valid_orientations()) {
         int dx = get<0>(ori);
-        if (container.space_available(pkg, x_offset, 0, 0, ori)) {
+        if (container.space_available(x_offset, 0, 0, ori)) {
           candidates.push_back({pkg, ori, dx});
         }
       }
@@ -149,7 +149,7 @@ void GreedyHeuristic::execute() {
     std::sort(candidates.begin(), candidates.end(), comp_candidates);
 
     std::cout << " Sorted layer candidates: " << std::endl;
-    for (const auto c : candidates) {
+    for (const auto &c : candidates) {
       std::cout << c.pkg.id << std::endl;
     }
 
@@ -178,7 +178,7 @@ void GreedyHeuristic::execute() {
       std::cout << " Inserting package in the corner " << cx << " " << cy << " "
                 << cz << std::endl;
 
-      for (auto i{0}; i < unallocated.size(); ++i) {
+      for (auto i{0}; i < (int)unallocated.size(); ++i) {
         auto &pkg = unallocated[i];
 
         std::cout << " Testing package: " << pkg.id << std::endl;
@@ -193,8 +193,8 @@ void GreedyHeuristic::execute() {
           }
 
           // 4.2.2 - Calculate the cavity degree of the package
-          if (container.space_available(pkg, cx, cy, cz, ori)) {
-            double cavity = cavity_degree(pkg, cx, cy, cz, dx, dy, dz);
+          if (container.space_available(cx, cy, cz, ori)) {
+            double cavity = cavity_degree(cx, cy, cz, dx, dy, dz);
 
             std::cout << " - Cavity Degree: " << cavity << std::endl;
 

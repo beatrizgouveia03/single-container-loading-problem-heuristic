@@ -11,7 +11,7 @@ public:
   std::vector<Package> allocated_packages;
 
   Container(int _c, int _l, int _a);
-  bool space_available(Package &package, int x, int y, int z,
+  bool space_available(int x, int y, int z,
                        std::tuple<int, int, int> orientation);
 };
 

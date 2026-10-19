@@ -6,7 +6,7 @@ Container::Container(int _c, int _l, int _a) {
   a = _a;
 }
 
-bool Container::space_available(Package &package, int x, int y, int z,
+bool Container::space_available(int x, int y, int z,
                                 std::tuple<int, int, int> orientation) {
   int oc = std::get<0>(orientation);
   int ol = std::get<1>(orientation);
