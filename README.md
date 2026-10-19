@@ -72,9 +72,6 @@ Available commands (type `ajuda` in the console):
 | `ajuda` | Shows the help |
 | `sair` | Exits |
 
-> The command names and console messages are kept in Portuguese, as they are
-> in the program itself (`criar` = create, `listar` = list, `rodar` = run,
-> `ajuda` = help, `sair` = exit).
 
 Example session (the heuristic's debug output has been omitted):
 
