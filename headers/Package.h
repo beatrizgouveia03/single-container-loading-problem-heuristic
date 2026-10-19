@@ -6,15 +6,15 @@
 #include <vector>
 
 struct Package {
-    int id;
-    double c, l, a;
-    double volume;
-    double pos_x = 0, pos_y = 0, pos_z = 0;
-    double ori_c = 0, ori_l = 0, ori_a = 0;
-    bool alocated = false;
+  int id;
+  int c, l, a;
+  int volume;
+  int pos_x = 0, pos_y = 0, pos_z = 0;
+  int ori_c = 0, ori_l = 0, ori_a = 0;
+  bool allocated = false;
 
-    Package(int _id, double _c, double _l, double _a);
-    std::vector<std::tuple<double, double, double>> get_valid_orientations();
+  Package(int _id, int _c, int _l, int _a);
+  std::vector<std::tuple<int, int, int>> get_valid_orientations();
 };
 
 #endif
