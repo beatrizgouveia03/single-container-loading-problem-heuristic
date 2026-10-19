@@ -62,3 +62,24 @@ int InstanceManager::countFiles(const fs::path& folder) {
     }
     return count;
 }
+
+vector<vector<int>> InstanceManager::readInstance(int instanceIndex){
+    string fileName = "instance_" + to_string(instanceIndex) + ".json";
+    fs::path path = fs::path(folder) / fileName;
+
+    cout << fileName << "\n";
+    ifstream file(path);
+    if(!file.is_open()){
+        cerr << "Could not open file \n";
+        return vector<vector<int>>();
+    }
+
+    json j = json::parse(file);
+    vector<vector<int>> instanceVector;
+    for(const auto& package : j){
+        instanceVector.push_back(package.get<vector<int>>());
+    }
+
+    return instanceVector;
+
+}

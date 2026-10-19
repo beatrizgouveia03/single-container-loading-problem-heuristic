@@ -3,6 +3,7 @@
 
 #include "../lib/json.hpp"
 #include <string>
+#include <vector>
 
 using json = nlohmann::json;
 using namespace std;
@@ -17,13 +18,13 @@ class InstanceManager
 
     void generate(int packageNumber, int maxDimension, int minDimension);
 
-    void createInstance(int instanceNumber);
-
     void save(json j, string name);
 
     int randomInt(int min, int max);
 
     int countFiles(const fs::path& folder);
+
+    vector<vector<int>> readInstance(int instanceIndex);
 };
 
 #endif
