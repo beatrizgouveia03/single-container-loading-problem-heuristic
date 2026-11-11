@@ -27,13 +27,14 @@ public:
 
   InstanceManager(string _folder);
 
-  Instance generate(int packageNumber, int minDimension, int maxDimension,
-                    int containerC, int containerL, int containerA);
+  Instance generate(int itemTypes, int minDimension, int maxDimension,
+                  int minQuantity, int maxQuantity,
+                  int containerC, int containerL, int containerA);
 
-  vector<Instance> generateGroup(const string &group, int count,
-                                 int packageNumber, int minDimension,
-                                 int maxDimension, int containerC,
-                                 int containerL, int containerA);
+  vector<Instance> generateGroup(const string &group, int count, int itemTypes,
+                               int minDimension, int maxDimension,
+                               int minQuantity, int maxQuantity,
+                               int containerC, int containerL, int containerA);
 
   void save(json j, string name);
 
@@ -65,10 +66,11 @@ public:
 private:
   // Salva uma instância em <dir>/instance_<id>.json. group/iteration são
   // gravados como metadados quando informados (grupos).
-  Instance generateAt(const fs::path &dir, int id, int packageNumber,
-                      int minDimension, int maxDimension, int containerC,
-                      int containerL, int containerA, const string &group = "",
-                      int iteration = 0);
+  Instance generateAt(const fs::path &dir, int id, int itemTypes,
+                    int minDimension, int maxDimension,
+                    int minQuantity, int maxQuantity,
+                    int containerC, int containerL, int containerA,
+                    const string &group = "", int iteration = 0);
 
   void saveAt(const fs::path &dir, json j, const string &name);
 };

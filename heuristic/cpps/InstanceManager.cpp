@@ -13,20 +13,23 @@
 
 InstanceManager::InstanceManager(string _folder) { folder = _folder; }
 
-Instance InstanceManager::generate(int packageNumber, int minDimension,
-                                   int maxDimension, int containerC,
+Instance InstanceManager::generate(int itemTypes, int minDimension,
+                                   int maxDimension, int minQuantity,
+                                   int maxQuantity, int containerC,
                                    int containerL, int containerA) {
-  return generateAt(folder, nextIndex(folder), packageNumber, minDimension,
-                    maxDimension, containerC, containerL, containerA);
+  return generateAt(folder, nextIndex(folder), itemTypes, minDimension,
+                    maxDimension, minQuantity, maxQuantity, containerC,
+                    containerL, containerA);
 }
-
 Instance InstanceManager::generateAt(const fs::path &dir, int id,
-                                     int packageNumber, int minDimension,
-                                     int maxDimension, int containerC,
+                                     int itemTypes, int minDimension,
+                                     int maxDimension, int minQuantity,
+                                     int maxQuantity, int containerC,
                                      int containerL, int containerA,
                                      const string &group, int iteration) {
-  if (packageNumber < 1 || minDimension < 1 || maxDimension < minDimension ||
-      containerC < 1 || containerL < 1 || containerA < 1) {
+  if (itemTypes < 1 || minDimension < 1 || maxDimension < minDimension ||
+      minQuantity < 1 || maxQuantity < minQuantity || containerC < 1 ||
+      containerL < 1 || containerA < 1) {
     std::cerr << "Could not generate instance: invalid arguments\n";
     return Instance();
   }
@@ -39,29 +42,41 @@ Instance InstanceManager::generateAt(const fs::path &dir, int id,
   instance.l = containerL;
   instance.a = containerA;
 
-  for (int i = 0; i < packageNumber; i++) {
-    instance.packages.push_back({randomInt(minDimension, maxDimension),
-                                 randomInt(minDimension, maxDimension),
-                                 randomInt(minDimension, maxDimension)});
+  // Cada tipo tem dimensões fixas e é repetido uma quantidade aleatória de vezes.
+  json types = json::array();
+  for (int t = 0; t < itemTypes; t++) {
+    vector<int> dims = {randomInt(minDimension, maxDimension),
+                        randomInt(minDimension, maxDimension),
+                        randomInt(minDimension, maxDimension)};
+    int quantity = randomInt(minQuantity, maxQuantity);
+
+    for (int q = 0; q < quantity; q++) {
+      instance.packages.push_back(dims);
+    }
+    types.push_back({{"dimensoes", dims}, {"quantidade", quantity}});
   }
 
   json j;
   j["container"] = {containerC, containerL, containerA};
   j["packages"] = instance.packages;
+  j["tipos"] = types; // metadado informativo; o leitor ignora
   if (!group.empty()) {
     j["grupo"] = group;
     j["iteracao"] = iteration;
   }
   j["min"] = minDimension;
   j["max"] = maxDimension;
+  j["min_qtd"] = minQuantity;
+  j["max_qtd"] = maxQuantity;
   saveAt(dir, j, "instance_" + to_string(instance.id) + ".json");
 
   return instance;
 }
 
 vector<Instance> InstanceManager::generateGroup(
-    const string &group, int count, int packageNumber, int minDimension,
-    int maxDimension, int containerC, int containerL, int containerA) {
+    const string &group, int count, int itemTypes, int minDimension,
+    int maxDimension, int minQuantity, int maxQuantity, int containerC,
+    int containerL, int containerA) {
   vector<Instance> instances;
 
   if (!validGroupName(group)) {
@@ -73,8 +88,9 @@ vector<Instance> InstanceManager::generateGroup(
     std::cerr << "Could not generate group: count must be >= 1\n";
     return instances;
   }
-  if (packageNumber < 1 || minDimension < 1 || maxDimension < minDimension ||
-      containerC < 1 || containerL < 1 || containerA < 1) {
+  if (itemTypes < 1 || minDimension < 1 || maxDimension < minDimension ||
+      minQuantity < 1 || maxQuantity < minQuantity || containerC < 1 ||
+      containerL < 1 || containerA < 1) {
     std::cerr << "Could not generate group: invalid arguments\n";
     return instances;
   }
@@ -89,6 +105,7 @@ vector<Instance> InstanceManager::generateGroup(
   // As dimensões da última iteração são a base multiplicada por <count>.
   // Conferimos antes de gerar para não estourar int no meio do caminho
   // (Package::volume é int, então o maior pacote precisa caber em int).
+  // As quantidades não crescem com a iteração, então não entram nesta checagem.
   long last = count;
   long last_max_dimension = (long)maxDimension * last;
   if (last_max_dimension > INT_MAX || (long)containerC * last > INT_MAX ||
@@ -108,10 +125,10 @@ vector<Instance> InstanceManager::generateGroup(
   fs::create_directories(dir);
   for (int i = 1; i <= count; i++) {
     const int factor = i;
-    Instance instance =
-        generateAt(dir, i, packageNumber, minDimension * factor,
-                   maxDimension * factor, containerC * factor,
-                   containerL * factor, containerA * factor, group, i);
+    Instance instance = generateAt(
+        dir, i, itemTypes, minDimension * factor, maxDimension * factor,
+        minQuantity, maxQuantity, containerC * factor, containerL * factor,
+        containerA * factor, group, i);
     if (instance.packages.empty()) {
       std::cerr << "Falha ao gerar a instância " << i << " do grupo '" << group
                 << "'.\n";
@@ -124,12 +141,15 @@ vector<Instance> InstanceManager::generateGroup(
   json meta;
   meta["grupo"] = group;
   meta["instancias"] = count;
-  meta["pacotes"] = packageNumber;
+  meta["tipos_de_itens"] = itemTypes;
   meta["min_base"] = minDimension;
   meta["max_base"] = maxDimension;
+  meta["min_qtd"] = minQuantity;
+  meta["max_qtd"] = maxQuantity;
   meta["container_base"] = {containerC, containerL, containerA};
   meta["regra_crescimento"] = "iteracao i: pacotes [min*i, max*i], container "
-                              "* i nas tres dimensoes";
+                              "* i nas tres dimensoes; quantidades por tipo "
+                              "fixas em [min_qtd, max_qtd]";
   saveAt(dir, meta, "grupo.json");
 
   return instances;

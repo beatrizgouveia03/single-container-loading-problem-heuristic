@@ -61,10 +61,10 @@ Available commands (type `ajuda` in the console):
 
 | Command | Description |
 | --- | --- |
-| `criar <packages> <min> <max> <C> <L> <A>` | Creates an instance with `<packages>` packages of random dimensions between `<min>` and `<max>`, for a `C x L x A` container. E.g.: `criar 8 2 5 15 10 10` |
+| `criar <types> <min> <max> <minQty> <maxQty> <C> <L> <A>` | Creates an instance with `<types>` different item types. Each type gets random dimensions between `<min>` and `<max>` and is repeated a random number of times between `<minQty>` and `<maxQty>`, for a `C x L x A` container. E.g.: `criar 5 2 5 1 4 15 10 10` |
 | `listar` | Lists the instances saved in `instances/` with their container and number of packages |
 | `rodar <id>` | Loads instance `<id>`, runs the heuristic and writes the report to `saidas/saida_<id>.txt` |
-| `criar-grupo <name> <n> <packages> <min> <max> <C> <L> <A>` | Creates `<n>` instances in `instances/<name>/`. Instance `i` uses packages between `<min>*i` and `<max>*i` and a container `C*i x L*i x A*i`. E.g.: `criar-grupo escala 50 20 1 5 15 10 10` |
+| `criar-grupo <name> <n> <types> <min> <max> <minQty> <maxQty> <C> <L> <A>` | Creates `<n>` instances in `instances/<name>/`. Instance `i` uses item dimensions between `<min>*i` and `<max>*i` and a container `C*i x L*i x A*i`; the quantity per type always stays between `<minQty>` and `<maxQty>`. E.g.: `criar-grupo escala 50 10 1 5 1 4 15 10 10` |
 | `listar-grupos` | Lists the groups under `instances/` with their instance count |
 | `listar-grupo <name>` | Lists the instances of a group |
 | `rodar-grupo <name>` | Runs every instance of the group and writes its performance CSV |
@@ -72,8 +72,18 @@ Available commands (type `ajuda` in the console):
 | `ajuda` | Shows the help |
 | `sair` | Exits |
 
+**Argument rules** (invalid values are rejected with an error message):
 
-Example session (the heuristic's debug output has been omitted):
+- `<types>` ≥ 1
+- `<min>` ≥ 1 and `<max>` ≥ `<min>`
+- `<minQty>` ≥ 1 and `<maxQty>` ≥ `<minQty>`
+- `C`, `L`, `A` ≥ 1
+
+The total number of packages in an instance is therefore random, between
+`<types> * <minQty>` and `<types> * <maxQty>`.
+
+Example session (the heuristic's debug output has been omitted; the numbers
+are illustrative, since dimensions and quantities are random):
 
 ```console
 $ ./exec_trabalho
@@ -81,34 +91,42 @@ $ ./exec_trabalho
 Instâncias em: instances/
 Digite 'ajuda' para ver os comandos.
 
-> criar 8 2 5 15 10 10
+> criar 5 2 5 1 4 15 10 10
 Instância 1 salva em instances/instance_1.json
   contêiner: 15 x 10 x 10 (volume 1500)
-  pacotes:   8 com dimensões entre 2 e 5 (volume total 454)
+  itens:     5 tipos com dimensões entre 2 e 5, 1 a 4 unidades por tipo
+  pacotes:   12 no total (volume total 318)
 Para testar:  rodar 1
 > listar
 Instâncias em instances:
-  [1] contêiner 15x10x10 | 8 pacotes
+  [1] contêiner 15x10x10 | 12 pacotes
 > rodar 1
 === Instância 1 ===
 Contêiner: 15 x 10 x 10
-Pacotes:   8
+Pacotes:   12
 ...
 === Resultado ===
-Alocados: 8 de 8 pacotes
-Ocupação: 454/1500 u³ (30.3 %)
+Alocados: 12 de 12 pacotes
+Ocupação: 318/1500 u³ (21.2 %)
 Relatório: saidas/saida_1.txt (visualize com `make visual ID=1`)
 > sair
 ```
 
-Commands can also be run outside the console (useful for scripts):
+If the sum of the package volumes exceeds the container volume, `criar` prints
+a warning: not every package will fit.
+
+Some commands can also be run outside the console (useful for scripts):
 
 ```bash
 ./exec_trabalho demo               # runs the built-in example and exits
 ./exec_trabalho rodar <id>         # runs the heuristic on instance <id> and exits
-./exec_trabalho criar-grupo escala 50 20 1 5 15 10 10
+./exec_trabalho criar-grupo escala 50 10 1 5 1 4 15 10 10
 ./exec_trabalho rodar-grupo escala # runs all 50 instances at once
+./exec_trabalho listar-grupos
+./exec_trabalho listar-grupo escala
 ```
+
+> `criar` is only available inside the console.
 
 ## Instance format
 
@@ -120,15 +138,38 @@ container dimensions and the dimensions of each package**:
     "container": [15, 10, 10],
     "packages": [
         [4, 4, 3],
+        [4, 4, 3],
         [5, 2, 5],
+        [2, 2, 2],
+        [2, 2, 2],
         [2, 2, 2]
-    ]
+    ],
+    "tipos": [
+        { "dimensoes": [4, 4, 3], "quantidade": 2 },
+        { "dimensoes": [5, 2, 5], "quantidade": 1 },
+        { "dimensoes": [2, 2, 2], "quantidade": 3 }
+    ],
+    "min": 2,
+    "max": 5,
+    "min_qtd": 1,
+    "max_qtd": 4
 }
 ```
 
 - `container`: `[length, width, height]` of the container (integer units).
-- `packages`: list of `[l, w, h]` for each package. Ids are assigned by list
-  order (1, 2, 3, ...).
+- `packages`: flat list of `[l, w, h]` for each package. Every item type
+  appears as many times as its quantity. Ids are assigned by list order
+  (1, 2, 3, ...).
+- `tipos`: the item types that generated `packages`, with their dimensions and
+  quantity (informational).
+- `min`, `max`, `min_qtd`, `max_qtd`: the generation parameters
+  (informational).
+- Instances created by `criar-grupo` also carry `grupo` (group name) and
+  `iteracao` (iteration number).
+
+The reader only uses `container` and `packages`; the other fields are
+metadata and are ignored, so instances generated before this change are still
+read normally.
 
 Instances in the old format (only the list of packages, with no `container`) are
 still recognized by the reader, but **cannot be run** — `rodar` warns about it
@@ -137,10 +178,12 @@ and asks you to recreate the instance with the `criar` command.
 ## Instance groups
 
 `criar-grupo` builds a whole family of instances at once. Instance `i`
-(1..`n`) scales every dimension by `i`, which increases the absolute
-heterogeneity of the packages while preserving all proportions:
+(1..`n`) scales every dimension (items and container) by `i`, which increases
+the absolute heterogeneity of the packages while preserving all proportions.
+The **quantity per type does not scale**: it is drawn from
+`[<minQty>, <maxQty>]` in every iteration.
 
-| iteration | packages (min..max) | container |
+| iteration | item dimensions (min..max) | container |
 | --- | --- | --- |
 | 1 | 1..5 | 15 × 10 × 10 |
 | 2 | 2..10 | 30 × 20 × 20 |
@@ -148,7 +191,7 @@ heterogeneity of the packages while preserving all proportions:
 | 50 | 50..250 | 750 × 500 × 500 |
 
 ```bash
-./exec_trabalho criar-grupo escala 50 20 1 5 15 10 10
+./exec_trabalho criar-grupo escala 50 10 1 5 1 4 15 10 10
 ```
 
 Each group lives in its own folder inside `instances/`:
@@ -166,21 +209,32 @@ saidas/escala/
 └── saida_50.txt
 ```
 
+`grupo.json` records the generation parameters: `grupo`, `instancias`,
+`tipos_de_itens`, `min_base`, `max_base`, `min_qtd`, `max_qtd`,
+`container_base` and `regra_crescimento`. It is not an instance, so the reader
+ignores it.
+
 An existing group is never overwritten: pick another name or remove the folder
-to generate it again.
+to generate it again. Group names may only contain letters, digits, `_` and
+`-`. Before generating, the command also checks that the scaled dimensions
+(and the volume of the largest package) fit in an `int` for the requested
+number of iterations.
 
 `rodar-grupo <name>` runs the heuristic on every instance in one go (the
 detailed per-package log is silenced):
 
 ```console
 $ ./exec_trabalho rodar-grupo escala
-[  1/50] instância   1: 20/20 pacotes, 29.53 % (443/1500 u³)
+[  1/50] instância   1: 24/24 pacotes, 31.20 % (468/1500 u³)
 ...
 === Desempenho do grupo 'escala' ===
 Instâncias executadas: 50
 Ocupação média: 35.58 %
 Desempenho por id: instances/escala/desempenho.csv
 ```
+
+Since the quantity of each type is random, the number of packages can differ
+from one instance to the next.
 
 ### Performance file
 
@@ -189,8 +243,8 @@ volume, total volume and occupancy:
 
 ```csv
 id,pacotes,alocados,volume_preenchido,volume_total,ocupacao_pct
-1,20,20,443,1500,29.53
-2,20,20,4358,12000,36.32
+1,24,24,468,1500,31.20
+2,19,19,4358,12000,36.32
 ```
 
 ### Performance chart
@@ -208,6 +262,12 @@ python3 visual/gerar_grafico_desempenho.py instances/escala/desempenho.csv
 
 Output: `visual/desempenho_escala.svg`. Without arguments, the script uses the
 most recent `instances/*/desempenho.csv`.
+
+## Output reports
+
+Running an instance writes a report to `saidas/saida_<id>.txt`
+(`saidas/<group>/saida_<id>.txt` for groups, and `saidas/saida_demo.txt` for
+the demo). These reports are the input of the 3D visualization.
 
 ## 3D visualization
 
@@ -251,6 +311,6 @@ python3 -m http.server 8000
 | `make test` | Builds and runs the tests |
 | `make visual` | Runs `demo` and generates `visual/index.html` from its report |
 | `make visual ID=<n>` | Runs the heuristic on instance `<n>` and generates `visual/index.html` |
-| `make grupo GRUPO=<name>` | Creates and runs a 50-instance growing group (20 packages, 1..5 dimensions, 15×10×10 base container) |
+| `make grupo GRUPO=<name>` | Creates and runs a 50-instance growing group (10 item types, 1..5 dimensions, 1..4 units per type, 15×10×10 base container) |
 | `make grafico GRUPO=<name>` | Generates the `visual/desempenho_<name>.svg` image (occupancy per instance id) from the group's performance CSV |
 | `make clean` | Removes `build/`, `exec_trabalho`, `saidas/` and `relatorio_saida.txt` |

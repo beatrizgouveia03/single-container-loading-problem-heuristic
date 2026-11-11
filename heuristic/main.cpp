@@ -60,16 +60,18 @@ static bool to_int(const string &text, int &out) {
 
 static void print_help() {
   cout << "Comandos:\n"
-       << "  criar <pacotes> <min> <max> <C> <L> <A>\n"
-       << "      Cria uma instância com <pacotes> pacotes de dimensões\n"
-       << "      aleatórias entre <min> e <max>, para um contêiner C x L x A.\n"
-       << "      Ex.: criar 10 2 5 15 10 10\n"
+       << "  criar <tipos> <min> <max> <minQtd> <maxQtd> <C> <L> <A>\n"
+       << "      Cria uma instância com <tipos> tipos de item diferentes. Cada\n"
+       << "      tipo tem dimensões aleatórias entre <min> e <max> e aparece\n"
+       << "      entre <minQtd> e <maxQtd> vezes, para um contêiner C x L x A.\n"
+       << "      Ex.: criar 5 2 5 1 4 15 10 10\n"
        << "  listar                    Lista as instâncias salvas.\n"
        << "  rodar <id>                Roda a heurística na instância <id>.\n"
-       << "  criar-grupo <nome> <n> <pacotes> <min> <max> <C> <L> <A>\n"
+       << "  criar-grupo <nome> <n> <tipos> <min> <max> <minQtd> <maxQtd> <C> <L> <A>\n"
        << "      Cria <n> instâncias em instances/<nome>/; a instância i usa\n"
-       << "      pacotes entre <min>*i e <max>*i e contêiner C*i x L*i x A*i.\n"
-       << "      Ex.: criar-grupo escala 50 20 1 5 15 10 10\n"
+       << "      dimensões entre <min>*i e <max>*i e contêiner C*i x L*i x A*i.\n"
+       << "      A quantidade por tipo fica sempre entre <minQtd> e <maxQtd>.\n"
+       << "      Ex.: criar-grupo escala 50 10 1 5 1 4 15 10 10\n"
        << "  listar-grupos             Lista os grupos e quantas instâncias têm.\n"
        << "  listar-grupo <nome>       Lista as instâncias de um grupo.\n"
        << "  rodar-grupo <nome>        Roda todas as instâncias do grupo e grava\n"
@@ -84,28 +86,37 @@ static void print_help() {
 // ---------------------------------------------------------------------------
 
 static void cmd_criar(InstanceManager &manager, const vector<string> &args) {
-  if (args.size() != 7) {
-    cerr << "Uso: criar <pacotes> <min> <max> <C> <L> <A>\n";
+  if (args.size() != 9) {
+    cerr << "Uso: criar <tipos> <min> <max> <minQtd> <maxQtd> <C> <L> <A>\n";
     return;
   }
 
-  int n, min_dim, max_dim, c, l, a;
-  if (!to_int(args[1], n) || !to_int(args[2], min_dim) ||
-      !to_int(args[3], max_dim) || !to_int(args[4], c) || !to_int(args[5], l) ||
-      !to_int(args[6], a)) {
+  int n_types, min_dim, max_dim, min_qty, max_qty, c, l, a;
+  if (!to_int(args[1], n_types) || !to_int(args[2], min_dim) ||
+      !to_int(args[3], max_dim) || !to_int(args[4], min_qty) ||
+      !to_int(args[5], max_qty) || !to_int(args[6], c) ||
+      !to_int(args[7], l) || !to_int(args[8], a)) {
     cerr << "Erro: todos os argumentos devem ser números inteiros.\n";
     return;
   }
-  if (n < 1) {
-    cerr << "Erro: o número de pacotes deve ser >= 1.\n";
+  if (n_types < 1) {
+    cerr << "Erro: o número de tipos de item deve ser >= 1.\n";
     return;
   }
   if (min_dim < 1 || max_dim < 1) {
-    cerr << "Erro: as dimensões dos pacotes devem ser >= 1.\n";
+    cerr << "Erro: as dimensões dos itens devem ser >= 1.\n";
     return;
   }
   if (max_dim < min_dim) {
     cerr << "Erro: <max> deve ser maior ou igual a <min>.\n";
+    return;
+  }
+  if (min_qty < 1 || max_qty < 1) {
+    cerr << "Erro: as quantidades por tipo devem ser >= 1.\n";
+    return;
+  }
+  if (max_qty < min_qty) {
+    cerr << "Erro: <maxQtd> deve ser maior ou igual a <minQtd>.\n";
     return;
   }
   if (c < 1 || l < 1 || a < 1) {
@@ -113,7 +124,8 @@ static void cmd_criar(InstanceManager &manager, const vector<string> &args) {
     return;
   }
 
-  Instance instance = manager.generate(n, min_dim, max_dim, c, l, a);
+  Instance instance = manager.generate(n_types, min_dim, max_dim, min_qty,
+                                       max_qty, c, l, a);
   if (instance.packages.empty()) {
     cerr << "Erro ao criar a instância.\n";
     return;
@@ -128,8 +140,11 @@ static void cmd_criar(InstanceManager &manager, const vector<string> &args) {
   cout << "Instância " << instance.id << " salva em " << instance.file << "\n";
   cout << "  contêiner: " << c << " x " << l << " x " << a << " (volume "
        << vol_container << ")\n";
-  cout << "  pacotes:   " << n << " com dimensões entre " << min_dim << " e "
-       << max_dim << " (volume total " << vol_packages << ")\n";
+  cout << "  itens:     " << n_types << " tipos com dimensões entre "
+       << min_dim << " e " << max_dim << ", " << min_qty << " a " << max_qty
+       << " unidades por tipo\n";
+  cout << "  pacotes:   " << instance.packages.size()
+       << " no total (volume total " << vol_packages << ")\n";
   if (vol_packages > vol_container) {
     cout << "  aviso: a soma dos volumes (" << vol_packages
          << ") excede o volume do contêiner (" << vol_container
@@ -230,16 +245,18 @@ static int cmd_listar_grupo(InstanceManager &manager,
 
 static int cmd_criar_grupo(InstanceManager &manager,
                            const vector<string> &args) {
-  if (args.size() != 9) {
-    cerr << "Uso: criar-grupo <nome> <n> <pacotes> <min> <max> <C> <L> <A>\n";
+  if (args.size() != 11) {
+    cerr << "Uso: criar-grupo <nome> <n> <tipos> <min> <max> <minQtd> "
+            "<maxQtd> <C> <L> <A>\n";
     return 1;
   }
 
   const string &group = args[1];
-  int n_instances, n_packages, min_dim, max_dim, c, l, a;
-  if (!to_int(args[2], n_instances) || !to_int(args[3], n_packages) ||
+  int n_instances, n_types, min_dim, max_dim, min_qty, max_qty, c, l, a;
+  if (!to_int(args[2], n_instances) || !to_int(args[3], n_types) ||
       !to_int(args[4], min_dim) || !to_int(args[5], max_dim) ||
-      !to_int(args[6], c) || !to_int(args[7], l) || !to_int(args[8], a)) {
+      !to_int(args[6], min_qty) || !to_int(args[7], max_qty) ||
+      !to_int(args[8], c) || !to_int(args[9], l) || !to_int(args[10], a)) {
     cerr << "Erro: todos os argumentos após <nome> devem ser inteiros.\n";
     return 1;
   }
@@ -247,16 +264,24 @@ static int cmd_criar_grupo(InstanceManager &manager,
     cerr << "Erro: o número de instâncias deve ser >= 1.\n";
     return 1;
   }
-  if (n_packages < 1) {
-    cerr << "Erro: o número de pacotes deve ser >= 1.\n";
+  if (n_types < 1) {
+    cerr << "Erro: o número de tipos de item deve ser >= 1.\n";
     return 1;
   }
   if (min_dim < 1 || max_dim < 1) {
-    cerr << "Erro: as dimensões dos pacotes devem ser >= 1.\n";
+    cerr << "Erro: as dimensões dos itens devem ser >= 1.\n";
     return 1;
   }
   if (max_dim < min_dim) {
     cerr << "Erro: <max> deve ser maior ou igual a <min>.\n";
+    return 1;
+  }
+  if (min_qty < 1 || max_qty < 1) {
+    cerr << "Erro: as quantidades por tipo devem ser >= 1.\n";
+    return 1;
+  }
+  if (max_qty < min_qty) {
+    cerr << "Erro: <maxQtd> deve ser maior ou igual a <minQtd>.\n";
     return 1;
   }
   if (c < 1 || l < 1 || a < 1) {
@@ -264,8 +289,9 @@ static int cmd_criar_grupo(InstanceManager &manager,
     return 1;
   }
 
-  vector<Instance> generated = manager.generateGroup(
-      group, n_instances, n_packages, min_dim, max_dim, c, l, a);
+  vector<Instance> generated =
+      manager.generateGroup(group, n_instances, n_types, min_dim, max_dim,
+                            min_qty, max_qty, c, l, a);
   if (generated.empty()) {
     return 1; // o motivo já foi impresso pelo generateGroup
   }
@@ -273,14 +299,16 @@ static int cmd_criar_grupo(InstanceManager &manager,
   long last = n_instances;
   cout << "Grupo '" << group << "' criado em "
        << manager.groupFolder(group).string() << "\n";
-  cout << "  instâncias: " << n_instances << ", pacotes por instância: "
-       << n_packages << "\n";
-  cout << "  regra: na iteração i, pacotes entre " << min_dim << "*i e "
+  cout << "  instâncias: " << n_instances << ", tipos de item por instância: "
+       << n_types << "\n";
+  cout << "  quantidade por tipo: " << min_qty << ".." << max_qty
+       << " (fixa em todas as iterações)\n";
+  cout << "  regra: na iteração i, dimensões entre " << min_dim << "*i e "
        << max_dim << "*i e contêiner " << c << "*i x " << l << "*i x " << a
        << "*i\n";
-  cout << "  primeira: pacotes " << min_dim << ".." << max_dim
+  cout << "  primeira: dimensões " << min_dim << ".." << max_dim
        << ", contêiner " << c << "x" << l << "x" << a << "\n";
-  cout << "  última:   pacotes " << (long)min_dim * last << ".."
+  cout << "  última:   dimensões " << (long)min_dim * last << ".."
        << (long)max_dim * last << ", contêiner " << (long)c * last << "x"
        << (long)l * last << "x" << (long)a * last << "\n";
   cout << "Para rodar as " << n_instances
@@ -330,8 +358,8 @@ static int cmd_rodar(InstanceManager &manager, const vector<string> &args) {
   if (!instance.has_container()) {
     cerr << "Erro: a instância " << id << " (" << instance.file
          << ") foi salva no formato antigo, sem as dimensões do contêiner.\n"
-         << "Recrie a instância com o comando: criar <pacotes> <min> <max> "
-            "<C> <L> <A>\n";
+         << "Recrie a instância com o comando: criar <tipos> <min> <max> "
+            "<minQtd> <maxQtd> <C> <L> <A>\n";
     return 1;
   }
 
@@ -411,8 +439,8 @@ int main(int argc, char *argv[]) {
     cerr << "Comando não interativo inválido. Uso:\n"
          << "  ./exec_trabalho demo\n"
          << "  ./exec_trabalho rodar <id>\n"
-         << "  ./exec_trabalho criar-grupo <nome> <n> <pacotes> <min> <max> <C> "
-            "<L> <A>\n"
+         << "  ./exec_trabalho criar-grupo <nome> <n> <tipos> <min> <max> "
+            "<minQtd> <maxQtd> <C> <L> <A>\n"
          << "  ./exec_trabalho rodar-grupo <nome>\n";
     print_help();
     return 1;
