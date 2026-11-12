@@ -1,4 +1,4 @@
-#include "BagProblemAlgorithm.h"
+#include "header/BagProblemAlgorithm.h"
 #include <algorithm>
 
 std::vector<int> BagProblemAlgorithm::get_maximum_subset

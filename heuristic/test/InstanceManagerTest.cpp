@@ -3,9 +3,11 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
+
 
 namespace fs = std::filesystem;
 using namespace std;
@@ -31,29 +33,38 @@ int main() {
 
   // 1) Instância avulsa no formato novo (com as dimensões do contêiner),
   //    relida do disco para conferir o que foi salvo.
-  Instance generated = manager.generate(10, 1, 4, 15, 10, 10);
+  const int single_types = 5, single_min_qty = 9, single_max_qty = 50;
+  Instance generated = manager.generate(single_types, 1, 5, single_min_qty,
+                                        single_max_qty, 15, 10, 10);
   cout << "Instância gerada: " << generated.file << "\n";
   check(generated.id == 1, "a primeira instância avulsa deve ter id 1");
+  check((int)generated.packages.size() >= single_types * single_min_qty &&
+            (int)generated.packages.size() <= single_types * single_max_qty,
+        "total de pacotes da instância avulsa fora de [tipos*minQtd, "
+        "tipos*maxQtd]");
 
   Instance loaded = manager.readInstance(generated.id);
   check(loaded.has_container(), "contêiner não foi lido de volta");
-  check(loaded.packages == generated.packages, "os pacotes lidos diferem dos gerados");
+  check(loaded.packages == generated.packages,
+        "os pacotes lidos diferem dos gerados");
   check(loaded.c == 15 && loaded.l == 10 && loaded.a == 10,
         "dimensões do contêiner lidas erradas");
 
   cout << "Contêiner: " << loaded.c << " x " << loaded.l << " x " << loaded.a
        << "\nPacotes: " << loaded.packages.size() << "\n";
 
-  // 2) Grupo crescente: a instância i usa pacotes em [min*i, max*i] e
-  //    contêiner base*i em todas as dimensões.
+  // 2) Grupo crescente: a instância i usa dimensões em [min*i, max*i] e
+  //    contêiner base*i em todas as dimensões. A quantidade por tipo
+  //    fica em [min_qty, max_qty] em todas as iterações.
   const int count = 5;
-  const int packages = 8;
-  const int min_base = 1, max_base = 3;
+  const int item_types = 5;
+  const int min_base = 1, max_base = 5;
+  const int min_qty = 9, max_qty = 10;
   const int base_c = 15, base_l = 10, base_a = 10;
 
   vector<Instance> group =
-      manager.generateGroup(group_name, count, packages, min_base, max_base,
-                            base_c, base_l, base_a);
+      manager.generateGroup(group_name, count, item_types, min_base, max_base,
+                            min_qty, max_qty, base_c, base_l, base_a);
   check((int)group.size() == count, "o grupo deve ter " + to_string(count) +
                                         " instâncias");
   check(fs::exists(manager.groupFolder(group_name) / "grupo.json"),
@@ -65,32 +76,45 @@ int main() {
         "não deve existir uma instância além de <count>");
 
   for (int i = 1; i <= count; i++) {
-    Instance instance = manager.readInstance(manager.groupFolder(group_name), i);
+    Instance instance =
+        manager.readInstance(manager.groupFolder(group_name), i);
     check(instance.c == base_c * i && instance.l == base_l * i &&
               instance.a == base_a * i,
           "contêiner da instância " + to_string(i) + " não escala por i");
-    check((int)instance.packages.size() == packages,
-          "número de pacotes da instância " + to_string(i));
+
+    int total = (int)instance.packages.size();
+    check(total >= item_types * min_qty && total <= item_types * max_qty,
+          "número de pacotes da instância " + to_string(i) +
+              " fora de [tipos*minQtd, tipos*maxQtd]");
+
+    // No máximo <item_types> tipos distintos (dois tipos podem sortear as
+    // mesmas dimensões), e cada tipo aparece pelo menos <min_qty> vezes.
+    map<vector<int>, int> counts;
     for (const auto &package : instance.packages) {
+      ++counts[package];
       for (int dimension : package) {
         check(dimension >= min_base * i && dimension <= max_base * i,
-              "dimensão " + to_string(dimension) + " fora da faixa da iteracao " +
-                  to_string(i));
+              "dimensão " + to_string(dimension) +
+                  " fora da faixa da iteracao " + to_string(i));
       }
+    }
+    check((int)counts.size() <= item_types,
+          "mais tipos distintos que o pedido na instância " + to_string(i));
+    for (const auto &entry : counts) {
+      check(entry.second >= min_qty,
+            "tipo com menos de minQtd unidades na instância " + to_string(i));
     }
   }
 
   // Recriar um grupo existente não pode sobrescrever o que já foi gerado.
   vector<Instance> again =
-      manager.generateGroup(group_name, 2, 1, 1, 1, 1, 1, 1);
+      manager.generateGroup(group_name, 2, 1, 1, 1, 1, 1, 1, 1, 1);
   check(again.empty(), "recriar um grupo existente deve falhar");
   check(!fs::exists(manager.groupFolder(group_name) / "instance_6.json"),
         "o grupo existente não pode ser alterado");
 
   // Nome de grupo não pode escapar de instances/.
-  check(manager
-            .generateGroup("../fora", 1, 1, 1, 1, 1, 1, 1)
-            .empty(),
+  check(manager.generateGroup("../fora", 1, 1, 1, 1, 1, 1, 1, 1, 1).empty(),
         "nome de grupo inválido deve ser recusado");
   check(!fs::exists(fs::path("build") / "fora"),
         "nenhuma pasta pode ser criada fora do grupo");

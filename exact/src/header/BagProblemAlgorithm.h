@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <tuple>
-#include "../../heuristic/headers/Package.h"
+#include "../../../heuristic/headers/Package.h"
 #include "Utils.cpp"
 
 class BagProblemAlgorithm
