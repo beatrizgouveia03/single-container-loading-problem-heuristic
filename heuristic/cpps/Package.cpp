@@ -14,3 +14,9 @@ std::vector<std::tuple<int, int, int>> Package::get_valid_orientations() {
   return std::vector<std::tuple<int, int, int>>(orientations.begin(),
                                                 orientations.end());
 }
+
+
+void Package::set_quantity(int _q)
+{
+  quantity = _q;
+}

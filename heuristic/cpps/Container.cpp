@@ -4,6 +4,7 @@ Container::Container(int _c, int _l, int _a) {
   c = _c;
   l = _l;
   a = _a;
+  volume = c * l * a;
 }
 
 bool Container::space_available(int x, int y, int z,

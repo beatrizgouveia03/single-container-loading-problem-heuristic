@@ -8,11 +8,15 @@
 class Container {
 public:
   int c, l, a;
+  int volume;
   std::vector<Package> allocated_packages;
 
   Container(int _c, int _l, int _a);
   bool space_available(int x, int y, int z,
                        std::tuple<int, int, int> orientation);
+
+  
 };
+
 
 #endif
