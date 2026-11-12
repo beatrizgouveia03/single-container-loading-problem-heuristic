@@ -1,13 +1,14 @@
+#pragma once
 #include <vector>
 #include <tuple>
 #include "../../heuristic/headers/Package.h"
 
 struct Path
 {
-    Path(std::vector<int> _inserted_packages, int _occupied_volume)
+    Path(int size, int num = 0)
     {
-        inserted_packages = _inserted_packages;
-        occupied_volume = _occupied_volume;
+        inserted_packages = std::vector<int>(size, 0);
+        occupied_volume = num;
     }
 
     std::vector<int> inserted_packages;

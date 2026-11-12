@@ -13,16 +13,16 @@ class BagProblemAlgorithm
      * returns a subset that has the highest possible volume occupation without considering
      * spatial constraints
      */
-    std::vector<int> get_maximum_subset(std::vector<Package> package_list, int capacity);
+    std::vector<int> get_maximum_subset(std::vector<Package> &package_list, int capacity);
     
     private:
 
     Path bag_problem_recur(
-        std::vector<Package> package_list, 
-        int index, 
-        int capacity,
+        std::vector<Package> &package_list, 
         std::vector<std::vector<Path>> &memo,
-        Path path
+        Path &path,
+        int capacity,
+        int index
     );
 };
 
