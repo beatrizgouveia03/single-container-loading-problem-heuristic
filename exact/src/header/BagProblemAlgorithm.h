@@ -2,9 +2,8 @@
 #define __BAGPROBLEMALGORITHM_H__
 
 #include <vector>
-#include <tuple>
 #include "../../../heuristic/headers/Package.h"
-#include "Utils.cpp"
+#include "../Utils2.cpp"
 
 class BagProblemAlgorithm
 {

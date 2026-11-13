@@ -1,4 +1,4 @@
-#include "Heuristic.h"
+#include "../headers/Heuristic.h"
 #include <algorithm>
 #include <cmath>
 #include <filesystem>

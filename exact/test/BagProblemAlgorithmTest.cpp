@@ -8,6 +8,23 @@
 namespace fs = std::filesystem;
 using namespace std;
 
+static int failures = 0;
+
+static void check(bool condition, const string &message) {
+  if (!condition) {
+    cerr << "ERRO: " << message << "\n";
+    ++failures;
+  }
+}
+
+void print_subset(vector<int> _subset){
+    for(auto item:_subset)
+    {
+        std::cout << item << " "; 
+    }
+    std:: cout << "\n";
+}
+
 int main()
 {
 
@@ -58,6 +75,7 @@ int main()
         int container_volume = instance.a * instance.c * instance.l;
         auto subset = bagProblemAlgorithm.get_maximum_subset(formated_packages, container_volume);
         
+        print_subset(subset);
     }
 
     return 0;
