@@ -8,6 +8,15 @@ Package::Package(int _id, int _c, int _l, int _a) {
   volume = c * l * a;
 }
 
+Package::Package(int _id, int _c, int _l, int _a, int _q) {
+  id = _id;
+  c = _c;
+  l = _l;
+  a = _a;
+  quantity = _q;
+  volume = c * l * a;
+}
+
 std::vector<std::tuple<int, int, int>> Package::get_valid_orientations() {
   std::set<std::tuple<int, int, int>> orientations = {
       {c, l, a}, {c, a, l}, {l, c, a}, {l, a, c}, {a, c, l}, {a, l, c}};

@@ -2,6 +2,7 @@
 #define INSTANCE_GENERATOR_H
 
 #include "../lib/json.hpp"
+#include "Package.h"
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -17,6 +18,7 @@ struct Instance {
   string file;                 // caminho do arquivo da instância
   int c = 0, l = 0, a = 0;     // dimensões do contêiner
   vector<vector<int>> packages; // {c, l, a} de cada pacote
+  vector<Package> packages_exact;
 
   bool has_container() const { return c > 0 && l > 0 && a > 0; }
 };
@@ -31,7 +33,7 @@ public:
                   int minQuantity, int maxQuantity,
                   int containerC, int containerL, int containerA);
 
-  vector<Instance> generateGroup(const string &group, int count, int itemTypes,
+  virtual vector<Instance> generateGroup(const string &group, int count, int itemTypes,
                                int minDimension, int maxDimension,
                                int minQuantity, int maxQuantity,
                                int containerC, int containerL, int containerA);
@@ -63,10 +65,10 @@ public:
   // (letras, números, '_' e '-'; sem acentos, espaços ou separadores).
   static bool validGroupName(const string &group);
 
-private:
+
   // Salva uma instância em <dir>/instance_<id>.json. group/iteration são
   // gravados como metadados quando informados (grupos).
-  Instance generateAt(const fs::path &dir, int id, int itemTypes,
+  virtual Instance generateAt(const fs::path &dir, int id, int itemTypes,
                     int minDimension, int maxDimension,
                     int minQuantity, int maxQuantity,
                     int containerC, int containerL, int containerA,

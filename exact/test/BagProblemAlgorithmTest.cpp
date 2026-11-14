@@ -1,5 +1,5 @@
 #include "../src/header/BagProblemAlgorithm.h"
-#include "../../heuristic/headers/InstanceManager.h"
+#include "../src/header/InstanceManagerExact.h"
 #include <iostream>
 #include <filesystem>
 #include <fstream>
@@ -34,12 +34,12 @@ int main()
     fs::remove_all(fs::path("saidas") / group_name);
     fs::create_directories(root);
 
-    InstanceManager manager(root.string());
+    InstanceManagerExact manager(root.string());
 
     const int 
     instance_quantity = 5,
-    total_types = 5,
-    min_quantity = 5,
+    total_types = 6,
+    min_quantity = 4,
     max_quantity = 10,
     min_dimension = 1,
     max_dimension = 5,
@@ -64,18 +64,22 @@ int main()
     BagProblemAlgorithm bagProblemAlgorithm;
     for(Instance instance:generated)
     {
+        std::cout << "Dimensões {c,l,a} e quantidade:" << '\n';
         // conversion from vector to package object
-        vector<Package> formated_packages;
-        vector<vector<int>> unformated_packages = instance.packages;
-        for(vector<int> dimensions:unformated_packages)
+        vector<Package> packages = instance.packages_exact;
+        for(Package p:packages)
         {
-            formated_packages.push_back(Package(0,dimensions[0], dimensions[1], dimensions[2]));
+            std::cout << p.c << " " << p.l << " " <<  p.a << " " 
+            <<  p.quantity <<"\n";
         }
 
         int container_volume = instance.a * instance.c * instance.l;
-        auto subset = bagProblemAlgorithm.get_maximum_subset(formated_packages, container_volume);
+        auto subset = bagProblemAlgorithm.get_maximum_subset(packages, container_volume);
+        
+        std::cout << "Resultado: " << '\n';
         
         print_subset(subset);
+        std::cout << '\n';
     }
 
     return 0;

@@ -15,6 +15,8 @@ struct Package {
   int quantity;
 
   Package(int _id, int _c, int _l, int _a);
+  Package(int _id, int _c, int _l, int _a, int _q);
+
   std::vector<std::tuple<int, int, int>> get_valid_orientations();
   void set_quantity(int _q);
 };
