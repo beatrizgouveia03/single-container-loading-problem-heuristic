@@ -1,6 +1,21 @@
 #include "header/BagProblemAlgorithm.h"
 #include <algorithm>
 
+Node BagProblemAlgorithm::solve_knapsack(std::vector<Package> packages, const std::vector<int>& limits, int capacity)
+{
+    for (size_t k = 0; k < packages.size(); k++)
+        packages[k].quantity = limits[k];
+
+    std::vector<int> candidate = BagProblemAlgorithm::get_maximum_subset(packages, capacity);
+
+    int volume = 0;
+    for (size_t k = 0; k < candidate.size(); k++)
+        volume += candidate[k] * packages[k].volume;
+
+    return {volume, limits, candidate};
+}
+
+
 std::vector<int> BagProblemAlgorithm::get_maximum_subset
 (
     std::vector<Package> &package_list, 
@@ -11,6 +26,7 @@ std::vector<int> BagProblemAlgorithm::get_maximum_subset
     package_list.size(),
     std::vector<Path>(capacity + 1, Path(package_list.size(), -1)));
     auto p = Path(package_list.size());
+
     return bag_problem_recur(package_list, memo, p, capacity, 0).inserted_packages;
 }
 
