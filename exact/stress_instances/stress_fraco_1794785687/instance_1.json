@@ -1,0 +1,82 @@
+{
+    "container": [
+        10,
+        10,
+        10
+    ],
+    "grupo": "stress_fraco_1794785687",
+    "iteracao": 1,
+    "max": 5,
+    "max_qtd": 3,
+    "min": 1,
+    "min_qtd": 1,
+    "packages": [
+        [
+            5,
+            4,
+            4
+        ],
+        [
+            2,
+            5,
+            5
+        ],
+        [
+            5,
+            1,
+            2
+        ],
+        [
+            1,
+            4,
+            1
+        ],
+        [
+            2,
+            4,
+            4
+        ]
+    ],
+    "tipos": [
+        {
+            "dimensoes": [
+                5,
+                4,
+                4
+            ],
+            "quantidade": 2
+        },
+        {
+            "dimensoes": [
+                2,
+                5,
+                5
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                5,
+                1,
+                2
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                1,
+                4,
+                1
+            ],
+            "quantidade": 2
+        },
+        {
+            "dimensoes": [
+                2,
+                4,
+                4
+            ],
+            "quantidade": 3
+        }
+    ]
+}

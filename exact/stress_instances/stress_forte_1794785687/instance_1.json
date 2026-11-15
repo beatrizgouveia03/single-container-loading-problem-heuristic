@@ -1,0 +1,173 @@
+{
+    "container": [
+        20,
+        20,
+        20
+    ],
+    "grupo": "stress_forte_1794785687",
+    "iteracao": 1,
+    "max": 10,
+    "max_qtd": 3,
+    "min": 3,
+    "min_qtd": 1,
+    "packages": [
+        [
+            4,
+            4,
+            6
+        ],
+        [
+            10,
+            7,
+            5
+        ],
+        [
+            4,
+            8,
+            5
+        ],
+        [
+            6,
+            7,
+            9
+        ],
+        [
+            10,
+            7,
+            7
+        ],
+        [
+            10,
+            5,
+            5
+        ],
+        [
+            10,
+            7,
+            6
+        ],
+        [
+            6,
+            6,
+            9
+        ],
+        [
+            10,
+            10,
+            6
+        ],
+        [
+            5,
+            4,
+            3
+        ],
+        [
+            4,
+            9,
+            8
+        ],
+        [
+            3,
+            3,
+            10
+        ]
+    ],
+    "tipos": [
+        {
+            "dimensoes": [
+                4,
+                4,
+                6
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                10,
+                7,
+                5
+            ],
+            "quantidade": 3
+        },
+        {
+            "dimensoes": [
+                4,
+                8,
+                5
+            ],
+            "quantidade": 3
+        },
+        {
+            "dimensoes": [
+                6,
+                7,
+                9
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                10,
+                7,
+                7
+            ],
+            "quantidade": 2
+        },
+        {
+            "dimensoes": [
+                10,
+                5,
+                5
+            ],
+            "quantidade": 3
+        },
+        {
+            "dimensoes": [
+                10,
+                7,
+                6
+            ],
+            "quantidade": 3
+        },
+        {
+            "dimensoes": [
+                6,
+                6,
+                9
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                10,
+                10,
+                6
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                5,
+                4,
+                3
+            ],
+            "quantidade": 3
+        },
+        {
+            "dimensoes": [
+                4,
+                9,
+                8
+            ],
+            "quantidade": 3
+        },
+        {
+            "dimensoes": [
+                3,
+                3,
+                10
+            ],
+            "quantidade": 1
+        }
+    ]
+}
