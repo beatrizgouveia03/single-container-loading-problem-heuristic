@@ -59,11 +59,10 @@ vector<Instance> InstanceManagerExact::generateGroup(
 
   fs::create_directories(dir);
   for (int i = 1; i <= count; i++) {
-    const int factor = i;
     Instance instance = InstanceManagerExact::generateAt(
-        dir, i, itemTypes, minDimension * factor, maxDimension * factor,
-        minQuantity, maxQuantity, containerC * factor, containerL * factor,
-        containerA * factor, group, i);
+        dir, i, itemTypes, minDimension, maxDimension ,
+        minQuantity, maxQuantity, containerC , containerL ,
+        containerA, group, i);
     if (instance.packages.empty()) {
       std::cerr << "Falha ao gerar a instância " << i << " do grupo '" << group
                 << "'.\n";

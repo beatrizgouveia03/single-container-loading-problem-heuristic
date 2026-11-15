@@ -38,11 +38,11 @@ int main()
 
     const int 
     instance_quantity = 5,
-    total_types = 6,
+    total_types = 10,
     min_quantity = 4,
     max_quantity = 10,
     min_dimension = 1,
-    max_dimension = 5,
+    max_dimension = 6,
     container_c = 15,
     container_l = 10,
     container_a = 10;
@@ -73,12 +73,21 @@ int main()
             <<  p.quantity <<"\n";
         }
 
-        int container_volume = instance.a * instance.c * instance.l;
+        int container_volume = container_a * container_c * container_l;
         auto subset = bagProblemAlgorithm.get_maximum_subset(packages, container_volume);
         
         std::cout << "Resultado: " << '\n';
         
         print_subset(subset);
+
+        int ocupado = 0;
+        
+        for(int i=0; i<packages.size(); i++){
+            int p_volume = packages[i].a * packages[i].c * packages[i].l;
+            ocupado += p_volume * subset[i];
+        }
+        
+        std::cout << "Volume ocupado: " << ocupado << " Volume total: " << container_volume;
         std::cout << '\n';
     }
 
