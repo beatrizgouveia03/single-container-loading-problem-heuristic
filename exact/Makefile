@@ -1,6 +1,6 @@
 CXX      := g++
 BUILD    := build
-CXXFLAGS := -Iheaders -std=c++17 -Wall -Wextra -MMD -MP
+CXXFLAGS := -O2 -Iheaders -std=c++17 -Wall -Wextra -MMD -MP
 
 EXACT_SRCS := $(wildcard src/*.cpp)
 HEUR_SRCS  := $(wildcard ../heuristic/cpps/*.cpp)

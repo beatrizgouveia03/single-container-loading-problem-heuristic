@@ -77,21 +77,25 @@ static const char* status_name(Status s) {
 struct Report {
     int  stage;     // 1 = knapsack bound computed, 2 = solver finished
     long bound;     // volume of the first (unconstrained) knapsack solution
-    double ms;      // time spent inside solve_pcuc
-    long volume;    // volume of the optimal selection
-    int  boxes;     // number of boxes in the optimal selection
+    double ms;      // time spent inside solve
+    long volume;    // volume of the returned selection (optimal or incumbent)
+    int  boxes;     // number of boxes in that selection
     int  valid;     // basic sanity checks on the answer
+    int  proven;    // 1 = the search proved the volume optimal, 0 = out of time
+    long checks;    // packing checks performed
 };
  
 struct RunResult {
     Status status = Status::Crash;
     double wall_s = 0;       // wall time seen by the parent
-    double solve_s = 0;      // time inside solve_pcuc (only if solved)
+    double solve_s = 0;      // time inside the solver (only if it reported)
     bool have_bound = false;
     long bound = 0;
     long volume = 0;
     int boxes = 0;
     bool valid = false;
+    bool proven = false;     // optimality proven, not just "a feasible selection"
+    long checks = 0;
 };
  
 static void send_report(int fd, const Report& r) {
@@ -131,9 +135,14 @@ static RunResult run_isolated(const Instance& instance, int timeout_s, long mem_
             PackingChecker checker(instance.c, instance.l, instance.a);
             checker.set_node_limit(node_limit);
  
+            // Stop a little before the parent's SIGKILL, so "out of time" comes
+            // out as an answer (incumbent + bound) instead of a lost pipe.
+            double budget = timeout_s > 1 ? timeout_s - 0.1 : timeout_s * 0.9;
+ 
             auto t0 = Clock::now();
-            std::vector<int> result = solver.solve_pcuc(packages, capacity, checker);
-            if (result.empty()) _exit(4);   // search limit reached: answer unknown
+            SolveReport rep = solver.solve(packages, capacity, checker,
+                                           t0 + std::chrono::milliseconds((long)(budget * 1000)));
+            const std::vector<int>& result = rep.selection;
             auto t1 = Clock::now();
  
             long volume = 0;
@@ -146,11 +155,23 @@ static RunResult run_isolated(const Instance& instance, int timeout_s, long mem_
             }
             if (volume > (long)capacity) valid = false;
  
-            r.stage = 2;
             r.ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
+
+            // Independent check of the claim: the reported selection must really
+            // be a packing. Only done when there is time left in the budget.
+            if (valid && std::chrono::duration<double>(t1 - t0).count() < 0.8 * budget) {
+                checker.clear_deadline();
+                checker.set_node_limit(2000000);
+                bool feasible = checker.fits_without_overlap(result, packages);
+                if (!feasible && !checker.aborted()) valid = false;
+            }
+
+            r.stage = 2;
             r.volume = volume;
             r.boxes = boxes;
             r.valid = valid ? 1 : 0;
+            r.proven = rep.proven() ? 1 : 0;
+            r.checks = rep.checks;
             send_report(fds[1], r);
         } catch (const std::bad_alloc&) {
             _exit(2);
@@ -193,13 +214,15 @@ static RunResult run_isolated(const Instance& instance, int timeout_s, long mem_
     if (have1) { out.have_bound = true; out.bound = first.bound; }
  
     if (timed_out) {
-        out.status = Status::Timeout;
+        out.status = Status::Timeout;     // should not happen: the solver stops itself
     } else if (WIFEXITED(status) && WEXITSTATUS(status) == 0 && have2) {
-        out.status = Status::Solved;
+        out.status = last.proven ? Status::Solved : Status::Limit;
         out.solve_s = last.ms / 1000.0;
         out.volume = last.volume;
         out.boxes = last.boxes;
         out.valid = last.valid != 0;
+        out.proven = last.proven != 0;
+        out.checks = last.checks;
     } else if (WIFEXITED(status) && WEXITSTATUS(status) == 4) {
         out.status = Status::Limit;
     } else if (WIFEXITED(status) && WEXITSTATUS(status) == 2) {
@@ -377,24 +400,27 @@ int main(int argc, char** argv) {
  
             const RunResult& r = row.r;
             bool solved = r.status == Status::Solved;
-            double time = solved ? r.solve_s : r.wall_s;
-            double fill = solved ? 100.0 * r.volume / row.container_volume : 0;
-            double gap = (solved && r.have_bound && r.bound > 0)
+            // A "limite" run still has a feasible selection (the incumbent) and the
+            // bound it was trying to close, which is worth reporting.
+            bool answered = solved || r.status == Status::Limit;
+            double time = answered ? r.solve_s : r.wall_s;
+            double fill = answered ? 100.0 * r.volume / row.container_volume : 0;
+            double gap = (answered && r.have_bound && r.bound > 0)
                              ? 100.0 * (r.bound - r.volume) / r.bound : 0;
  
             csv << sc.name << "," << instance.id << "," << sc.C << "x" << sc.L << "x" << sc.A << ","
                 << sc.item_types << "," << row.boxes_available << ","
                 << fmt(100.0 * row.offered_volume / row.container_volume, 1) << ","
-                << status_name(r.status) << "," << fmt(time, 4) << ","
-                << (r.have_bound ? std::to_string(r.bound) : "") << ","
-                << (solved ? std::to_string(r.volume) : "") << ","
-                << (solved ? fmt(fill, 2) : "") << "," << (solved ? fmt(gap, 3) : "") << ","
-                << (solved ? std::to_string(r.boxes) : "") << "," << instance.file << "\n";
+                << status_name(r.status) << "," << fmt(time, 4) << ","                << (r.have_bound ? std::to_string(r.bound) : "") << ","
+                << (answered ? std::to_string(r.volume) : "") << ","
+                << (answered ? fmt(fill, 2) : "") << "," << (answered ? fmt(gap, 3) : "") << ","
+                << (answered ? std::to_string(r.boxes) : "") << "," << instance.file << "\n";
             csv.flush();
- 
+
             std::cout << "  instance " << instance.id << " (" << instance.file << "): " << status_name(r.status) << "  "
                       << fmt(time, 3) << " s";
-            if (solved) std::cout << "  volume " << r.volume << "/" << row.container_volume;
+            if (answered) std::cout << "  volume " << r.volume << "/" << row.container_volume;
+            if (r.status == Status::Limit) std::cout << " (incumbent, not proven)";
             if (solved && !r.valid) std::cout << "  [INVALID ANSWER]";
             std::cout << "\n";
         }

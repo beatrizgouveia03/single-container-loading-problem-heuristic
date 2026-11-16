@@ -84,6 +84,76 @@ static long brute_force_best(int L, int D, int H, const std::vector<Package>& pa
     return best;
 }
 
+// ------------------------------------------------- independent packing reference
+//
+// The fast checker uses a bitmask, propagation and a symmetry rule. This
+// reference keeps the dumb version -- every box at every position, comparing
+// against every placed box -- so a random comparison can show that the fast
+// checker still decides the same thing (it must not lose solutions).
+
+struct RefBox { int w, d, h; };
+struct RefPos { int x, y, z; };
+
+// 1 = a packing exists, 0 = none exists, -1 = reference out of budget
+static int ref_search(std::vector<RefBox>& boxes, std::vector<RefPos>& pos, size_t i,
+                      int L, int D, int H, long& budget) {
+    if (i == boxes.size()) return 1;
+    if (--budget < 0) return -1;
+
+    const RefBox& b = boxes[i];
+    for (int x = 0; x + b.w <= L; x++)
+        for (int y = 0; y + b.d <= D; y++)
+            for (int z = 0; z + b.h <= H; z++) {
+                bool collision = false;
+                for (size_t j = 0; j < i && !collision; j++) {
+                    const RefBox& o = boxes[j];
+                    const RefPos& p = pos[j];
+                    if (x < p.x + o.w && p.x < x + b.w &&
+                        y < p.y + o.d && p.y < y + b.d &&
+                        z < p.z + o.h && p.z < z + b.h)
+                        collision = true;
+                }
+                if (collision) continue;
+                pos[i] = {x, y, z};
+                int r = ref_search(boxes, pos, i + 1, L, D, H, budget);
+                if (r != 0) return r;
+            }
+    return 0;
+}
+
+static int ref_fits(int L, int D, int H, const std::vector<Package>& packages,
+                    const std::vector<int>& selection, long budget) {
+    std::vector<RefBox> boxes;
+    for (size_t k = 0; k < selection.size(); k++)
+        for (int i = 0; i < selection[k]; i++)
+            boxes.push_back({packages[k].c, packages[k].l, packages[k].a});
+    std::vector<RefPos> pos(boxes.size(), {0, 0, 0});
+    return ref_search(boxes, pos, 0, L, D, H, budget);
+}
+
+// The placements the checker returned must really be a packing.
+static bool placements_are_valid(const PackingChecker& checker, int L, int D, int H) {
+    const std::vector<Box>& boxes = checker.boxes();
+    const std::vector<Placement>& at = checker.placements_of_boxes();
+    if (boxes.size() != at.size()) return false;
+
+    for (size_t i = 0; i < boxes.size(); i++) {
+        const Box& b = boxes[i];
+        const Placement& p = at[i];
+        if (p.x < 0 || p.y < 0 || p.z < 0) return false;
+        if (p.x + b.w > L || p.y + b.d > D || p.z + b.h > H) return false;
+        for (size_t j = 0; j < i; j++) {
+            const Box& o = boxes[j];
+            const Placement& q = at[j];
+            if (p.x < q.x + o.w && q.x < p.x + b.w &&
+                p.y < q.y + o.d && q.y < p.y + b.d &&
+                p.z < q.z + o.h && q.z < p.z + b.h)
+                return false;
+        }
+    }
+    return true;
+}
+
 // Runs the exact solver and validates everything about its answer.
 // Returns the volume of the returned selection (or -1 if the answer is malformed).
 static long run_solver(int L, int D, int H, std::vector<Package>& packages,
@@ -236,6 +306,53 @@ static void test_pcuc_random(int iterations, unsigned seed) {
     }
 }
 
+// ------------------------------------------------- checker vs dumb reference
+
+static void test_checker_vs_reference(int iterations, unsigned seed) {
+    std::cout << "PackingChecker vs exhaustive reference (" << iterations
+              << " random cases, seed " << seed << ")\n";
+
+    std::mt19937 rng(seed);
+    auto rnd = [&](int lo, int hi) { return std::uniform_int_distribution<int>(lo, hi)(rng); };
+    long inconclusive = 0;
+
+    for (int it = 0; it < iterations; it++) {
+        int L = rnd(3, 5), D = rnd(3, 5), H = rnd(3, 5);
+        int types = rnd(1, 3);
+
+        std::vector<std::array<int, 4>> specs;
+        for (int t = 0; t < types; t++)
+            specs.push_back({rnd(1, 4), rnd(1, 4), rnd(1, 4), rnd(1, 3)});
+        auto packages = make_packages(specs);
+
+        // keep the reference cheap: at most three boxes
+        std::vector<int> selection(types, 0);
+        int boxes_left = rnd(1, 3);
+        for (int t = 0; t < types && boxes_left > 0; t++) {
+            int take = rnd(0, std::min(boxes_left, packages[t].quantity));
+            selection[t] = take;
+            boxes_left -= take;
+        }
+
+        std::string label = "reference #" + std::to_string(it) + " (container " +
+                            std::to_string(L) + "x" + std::to_string(D) + "x" +
+                            std::to_string(H) + ")";
+
+        PackingChecker checker(L, D, H);
+        bool got = checker.fits_without_overlap(selection, packages);
+        CHECK(!checker.aborted(), label + ": cheap check must not run out of budget");
+        if (got)
+            CHECK(placements_are_valid(checker, L, D, H), label + ": returned placements overlap");
+
+        int expected = ref_fits(L, D, H, packages, selection, 3000000);
+        if (expected < 0) { inconclusive++; continue; }
+        CHECK(got == (expected == 1), label + ": fast checker disagrees with the exhaustive search");
+    }
+
+    if (inconclusive > 0)
+        std::cout << "  (" << inconclusive << " case(s) skipped: reference out of budget)\n";
+}
+
 // ---------------------------------------------------------------- main
 
 int main(int argc, char** argv) {
@@ -243,6 +360,7 @@ int main(int argc, char** argv) {
     if (argc > 1) iterations = std::atoi(argv[1]);
 
     test_packing_checker();
+    test_checker_vs_reference(iterations, 999);
     test_pcuc_known();
     test_pcuc_random(iterations, 12345);
 

@@ -1,3 +1,4 @@
 scenario,instance,container,types,boxes_available,offered_volume_pct,status,time_s,bound_volume,optimal_volume,fill_pct,gap_pct,boxes_packed,instance_file
-fraco,1,10x10x10,5,9,32.4,resolvida,0.0010,324,324,32.40,0.000,9,stress_instances/stress_fraco_1794785687/instance_1.json
-medio,1,15x10x10,10,18,80.3,resolvida,0.0222,1204,1204,80.27,0.000,18,stress_instances/stress_medio_1794785687/instance_1.json
+fraco,1,10x10x10,5,11,32.4,resolvida,0.0002,324,324,32.40,0.000,11,stress_instances/stress_fraco_1794791903/instance_1.json
+medio,1,15x10x10,10,13,71.2,resolvida,0.0006,1068,1068,71.20,0.000,13,stress_instances/stress_medio_1794791903/instance_1.json
+forte,1,20x20x20,12,18,55.0,resolvida,0.0070,4396,4396,54.95,0.000,18,stress_instances/stress_forte_1794791903/instance_1.json
