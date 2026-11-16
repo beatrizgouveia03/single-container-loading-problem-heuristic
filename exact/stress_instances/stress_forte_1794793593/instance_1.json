@@ -4,7 +4,7 @@
         20,
         20
     ],
-    "grupo": "stress_forte_1794785682",
+    "grupo": "stress_forte_1794793593",
     "iteracao": 1,
     "max": 10,
     "max_qtd": 3,
@@ -12,162 +12,162 @@
     "min_qtd": 1,
     "packages": [
         [
-            3,
-            7,
-            5
+            6,
+            8,
+            8
         ],
         [
-            3,
+            9,
             9,
             7
         ],
         [
             9,
+            7,
+            8
+        ],
+        [
+            10,
+            10,
+            8
+        ],
+        [
+            3,
+            7,
+            7
+        ],
+        [
+            7,
+            6,
+            10
+        ],
+        [
+            8,
+            6,
+            6
+        ],
+        [
+            5,
+            3,
+            8
+        ],
+        [
+            4,
             4,
             4
         ],
         [
-            3,
-            6,
-            6
+            7,
+            5,
+            4
         ],
         [
             5,
-            10,
-            6
-        ],
-        [
-            9,
-            5,
-            10
-        ],
-        [
-            6,
-            3,
+            8,
             9
         ],
         [
-            9,
-            8,
-            3
-        ],
-        [
+            5,
             10,
-            7,
-            6
-        ],
-        [
-            9,
-            8,
-            3
-        ],
-        [
-            3,
-            8,
-            3
-        ],
-        [
-            7,
-            3,
-            8
+            4
         ]
     ],
     "tipos": [
         {
             "dimensoes": [
-                3,
-                7,
-                5
-            ],
-            "quantidade": 3
-        },
-        {
-            "dimensoes": [
-                3,
-                9,
-                7
-            ],
-            "quantidade": 2
-        },
-        {
-            "dimensoes": [
-                9,
-                4,
-                4
-            ],
-            "quantidade": 3
-        },
-        {
-            "dimensoes": [
-                3,
                 6,
-                6
-            ],
-            "quantidade": 1
-        },
-        {
-            "dimensoes": [
-                5,
-                10,
-                6
-            ],
-            "quantidade": 3
-        },
-        {
-            "dimensoes": [
-                9,
-                5,
-                10
-            ],
-            "quantidade": 1
-        },
-        {
-            "dimensoes": [
-                6,
-                3,
-                9
-            ],
-            "quantidade": 3
-        },
-        {
-            "dimensoes": [
-                9,
                 8,
-                3
-            ],
-            "quantidade": 2
-        },
-        {
-            "dimensoes": [
-                10,
-                7,
-                6
-            ],
-            "quantidade": 1
-        },
-        {
-            "dimensoes": [
-                9,
-                8,
-                3
-            ],
-            "quantidade": 2
-        },
-        {
-            "dimensoes": [
-                3,
-                8,
-                3
-            ],
-            "quantidade": 2
-        },
-        {
-            "dimensoes": [
-                7,
-                3,
                 8
             ],
             "quantidade": 2
+        },
+        {
+            "dimensoes": [
+                9,
+                9,
+                7
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                9,
+                7,
+                8
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                10,
+                10,
+                8
+            ],
+            "quantidade": 3
+        },
+        {
+            "dimensoes": [
+                3,
+                7,
+                7
+            ],
+            "quantidade": 3
+        },
+        {
+            "dimensoes": [
+                7,
+                6,
+                10
+            ],
+            "quantidade": 3
+        },
+        {
+            "dimensoes": [
+                8,
+                6,
+                6
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                5,
+                3,
+                8
+            ],
+            "quantidade": 3
+        },
+        {
+            "dimensoes": [
+                4,
+                4,
+                4
+            ],
+            "quantidade": 2
+        },
+        {
+            "dimensoes": [
+                7,
+                5,
+                4
+            ],
+            "quantidade": 2
+        },
+        {
+            "dimensoes": [
+                5,
+                8,
+                9
+            ],
+            "quantidade": 2
+        },
+        {
+            "dimensoes": [
+                5,
+                10,
+                4
+            ],
+            "quantidade": 1
         }
     ]
 }

@@ -53,7 +53,7 @@ static std::vector<Scenario> default_scenarios() {
     // Three levels, calibrated by measurement (-O2). The exact method is exponential in
     // the number of boxes of a candidate, so difficulty grows with types and copies.
     return {
-        {"fraco", "cenário fraco",   5,  1,  5, 1, 3, 10, 10, 10},
+        {"fraco", "cenário fraco",   5,  1,  10, 1, 4, 10, 10, 10},
         {"medio", "cenário médio",  10,  2,  6, 1, 2, 15, 10, 10},
         {"forte", "cenário forte",  12,  3, 10, 1, 3, 20, 20, 20},
     };

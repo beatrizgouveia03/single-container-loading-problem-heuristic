@@ -4,7 +4,7 @@
         10,
         10
     ],
-    "grupo": "stress_medio_1794785678",
+    "grupo": "stress_medio_1794793593",
     "iteracao": 1,
     "max": 6,
     "max_qtd": 2,
@@ -12,116 +12,92 @@
     "min_qtd": 1,
     "packages": [
         [
-            4,
-            3,
-            5
+            2,
+            5,
+            2
         ],
         [
             4,
-            6,
-            6
-        ],
-        [
-            4,
-            6,
+            2,
             3
         ],
         [
-            2,
-            6,
-            4
-        ],
-        [
-            4,
-            4,
-            6
-        ],
-        [
-            5,
-            5,
-            6
-        ],
-        [
             3,
-            5,
-            4
+            3,
+            2
         ],
         [
-            6,
+            2,
+            4,
+            3
+        ],
+        [
+            4,
             4,
             5
         ],
         [
+            5,
             2,
-            3,
+            6
+        ],
+        [
+            5,
+            4,
+            6
+        ],
+        [
+            6,
+            2,
+            4
+        ],
+        [
+            4,
+            5,
             3
         ],
         [
             6,
-            6,
-            4
+            2,
+            2
         ]
     ],
     "tipos": [
         {
             "dimensoes": [
-                4,
-                3,
-                5
+                2,
+                5,
+                2
             ],
             "quantidade": 2
         },
         {
             "dimensoes": [
                 4,
-                6,
-                6
+                2,
+                3
             ],
             "quantidade": 1
         },
         {
             "dimensoes": [
-                4,
-                6,
-                3
+                3,
+                3,
+                2
             ],
-            "quantidade": 2
+            "quantidade": 1
         },
         {
             "dimensoes": [
                 2,
-                6,
-                4
-            ],
-            "quantidade": 2
-        },
-        {
-            "dimensoes": [
                 4,
-                4,
-                6
+                3
             ],
             "quantidade": 1
         },
         {
             "dimensoes": [
-                5,
-                5,
-                6
-            ],
-            "quantidade": 1
-        },
-        {
-            "dimensoes": [
-                3,
-                5,
-                4
-            ],
-            "quantidade": 2
-        },
-        {
-            "dimensoes": [
-                6,
+                4,
                 4,
                 5
             ],
@@ -129,8 +105,32 @@
         },
         {
             "dimensoes": [
+                5,
                 2,
-                3,
+                6
+            ],
+            "quantidade": 2
+        },
+        {
+            "dimensoes": [
+                5,
+                4,
+                6
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                6,
+                2,
+                4
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                4,
+                5,
                 3
             ],
             "quantidade": 1
@@ -138,8 +138,8 @@
         {
             "dimensoes": [
                 6,
-                6,
-                4
+                2,
+                2
             ],
             "quantidade": 2
         }
