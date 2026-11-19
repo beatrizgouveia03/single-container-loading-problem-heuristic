@@ -12,14 +12,16 @@
 #include <vector>
 #include "Package.h"
 #include "Coordinates2d.h"
+#include "Types.h"
 
 using namespace std;
+
 
 class Corners2d
 {
     public:
-    static vector<Coordinates2d> getValidCorners(vector<Package> insertedPackages, vector<Package> Packages, int W, int H);
-    static int getEnvelopeArea(vector<Coordinates2d> points, int W, int H);
+    static vector<Coordinates2d> getValidCorners(vector<Package> insertedPackages, vector<Package> Packages, ll W, ll H);
+    static ll getEnvelopeArea(vector<Coordinates2d> polls, ll W, ll H);
 };
 
 #endif /* CORNERS2D_H */

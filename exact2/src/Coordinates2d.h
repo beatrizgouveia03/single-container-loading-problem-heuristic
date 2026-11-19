@@ -1,19 +1,21 @@
 #pragma once
+#include "Types.h"
+
 struct Coordinates2d
 {
-    int x,y;
-    Coordinates2d(int _x, int _y)
+    ll x,y;
+    Coordinates2d(ll _x, ll _y)
     {
         x = _x;
         y = _y;
     }
     Coordinates2d(){}
 
-    void setx(int _x)
+    void setx(ll _x)
     {
         x = _x;
     }
-    void sety(int _y)
+    void sety(ll _y)
     {
         y = _y;
     }

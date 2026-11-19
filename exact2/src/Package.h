@@ -4,22 +4,23 @@
 #include <vector>
 #include <tuple>
 #include "Coordinates3d.h"
+#include "Types.h"
 
 using namespace std;
 
 struct Package {
-  int id;
-  int c, l, a;
-  int volume;
+  ll id;
+  ll c, l, a;
+  ll volume;
   Coordinates3d position;
-  int ori_c = 0, ori_l = 0, ori_a = 0;
+  ll ori_c = 0, ori_l = 0, ori_a = 0;
   bool allocated = false;
-  int quantity;
+  ll quantity;
 
-  Package(int _c, int _l, int _a);
+  Package(ll _c, ll _l, ll _a);
   Package();
-  std::vector<std::tuple<int, int, int>> get_valid_orientations();
-  void set_quantity(int _q);
+  std::vector<std::tuple<ll, ll, ll>> get_valid_orientations();
+  void set_quantity(ll _q);
 };
 
 

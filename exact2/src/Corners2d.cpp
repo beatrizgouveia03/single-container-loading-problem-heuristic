@@ -2,11 +2,12 @@
 #include "Coordinates2d.h"
 #include <set>
 #include <algorithm>
+#include "Types.h"
 
 using namespace std;
 
 // não esquecer de ordenar os pacotes certo
-vector<Coordinates2d> Corners2d::getValidCorners(vector<Package> insertedPackages, vector<Package> packages, int W, int H)
+vector<Coordinates2d> Corners2d::getValidCorners(vector<Package> insertedPackages, vector<Package> packages, ll W, ll H)
 {
     if(insertedPackages.empty())
     {
@@ -14,11 +15,11 @@ vector<Coordinates2d> Corners2d::getValidCorners(vector<Package> insertedPackage
     }
 
     // caixas extremas
-    int x = 0;
-    int m = 0;
+    ll x = 0;
+    ll m = 0;
     vector<Package> extremeBoxes;
 
-    for(int i=0; i<insertedPackages.size(); i++)
+    for(ll i=0; i<insertedPackages.size(); i++)
     {
         Package package = insertedPackages[i];
         Coordinates2d position = Coordinates2d(package.position.x, package.position.y);
@@ -30,19 +31,19 @@ vector<Coordinates2d> Corners2d::getValidCorners(vector<Package> insertedPackage
         }
     }
 
-    // corner points
-    set<Coordinates2d> cornerPoints;
+    // corner polls
+    set<Coordinates2d> cornerPolls;
     vector<Coordinates2d> cp;
 
-    cornerPoints.insert(Coordinates2d(0, extremeBoxes[0].position.y + extremeBoxes[0].a)); // ponto colado na parede y
+    cornerPolls.insert(Coordinates2d(0, extremeBoxes[0].position.y + extremeBoxes[0].a)); // ponto colado na parede y
     cp.push_back(Coordinates2d(0, extremeBoxes[0].position.y + extremeBoxes[0].a));
-    for(int i=1; i<extremeBoxes.size(); i++)
+    for(ll i=1; i<extremeBoxes.size(); i++)
     {
         auto behindX = extremeBoxes[i-1].position.x + extremeBoxes[i-1].l; // x do ponto estremo anterior 
         auto currentY = extremeBoxes[i].position.y + extremeBoxes[i].a; // y do ponto estremo atual
-        if(cornerPoints.find(Coordinates2d(behindX, currentY)) == cornerPoints.end())
+        if(cornerPolls.find(Coordinates2d(behindX, currentY)) == cornerPolls.end())
         {
-            cornerPoints.insert(Coordinates2d(behindX, currentY));
+            cornerPolls.insert(Coordinates2d(behindX, currentY));
             cp.push_back(Coordinates2d(behindX, currentY));
         }
     }
@@ -54,8 +55,8 @@ vector<Coordinates2d> Corners2d::getValidCorners(vector<Package> insertedPackage
     if(packages.empty())
         return validCorners;
 
-    int minL = packages[0].l;
-    int minA = packages[0].a;
+    ll minL = packages[0].l;
+    ll minA = packages[0].a;
     for(const Package& p : packages)
     {
         minL = min(minL, p.l);
@@ -73,18 +74,18 @@ vector<Coordinates2d> Corners2d::getValidCorners(vector<Package> insertedPackage
     return validCorners;
 };
 
-int Corners2d::getEnvelopeArea(vector<Coordinates2d> points, int W, int H)
+ll Corners2d::getEnvelopeArea(vector<Coordinates2d> polls, ll W, ll H)
 {
 
-    if(points.empty())
+    if(polls.empty())
         return W * H;
-
-    int area = 0;
-    area += (points[0].x * H) + (W - points.back().x) * points.back().y;
+        
+    ll area = 0;
+    area += (polls[0].x * H) + (W - polls.back().x) * polls.back().y;
     
-    for(int i=1; i<points.size(); i++)
+    for(ll i=1; i<polls.size(); i++)
     {
-        area += (points[i].x - points[i-1].x) * points[i-1].y;
+        area += (polls[i].x - polls[i-1].x) * polls[i-1].y;
     }
     return area;
 }

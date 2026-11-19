@@ -4,14 +4,15 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include "../src/Types.h"
 
 using namespace std;
 
-static int failures = 0;
+static ll failures = 0;
 
 // Assume que Package tem os campos: position (Coordinates2d), l (largura), a (altura)
 // e um construtor padrao. Ajuste aqui se o seu Package for diferente.
-static Package makePackage(int x, int y, int l, int a)
+static Package makePackage(ll x, ll y, ll l, ll a)
 {
     Package p;
     p.position = Coordinates3d(x, y, 0);
@@ -20,7 +21,7 @@ static Package makePackage(int x, int y, int l, int a)
     return p;
 }
 
-static Package makeRemaining(int l, int a)
+static Package makeRemaining(ll l, ll a)
 {
     return makePackage(0, 0, l, a);
 }
@@ -49,7 +50,7 @@ static void check(const string& name, vector<Coordinates2d> got, vector<Coordina
 
 int main()
 {
-    const int W = 10, H = 10;
+    const ll W = 10, H = 10;
     Corners2d corners;
 
     // 1) Bin vazio: apenas a origem

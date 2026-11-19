@@ -1,10 +1,11 @@
 #pragma once
+#include "Types.h"
 
 struct Coordinates3d
 {
-    int x, y, z;
+    ll x, y, z;
 
-    Coordinates3d(int _x, int _y, int _z)
+    Coordinates3d(ll _x, ll _y, ll _z)
     {
         x = _x;
         y = _y;
@@ -12,9 +13,9 @@ struct Coordinates3d
     }
     Coordinates3d() : x(0), y(0), z(0) {}
 
-    void setx(int _x) { x = _x; }
-    void sety(int _y) { y = _y; }
-    void setz(int _z) { z = _z; }
+    void setx(ll _x) { x = _x; }
+    void sety(ll _y) { y = _y; }
+    void setz(ll _z) { z = _z; }
 
     bool operator<(const Coordinates3d& other) const
     {

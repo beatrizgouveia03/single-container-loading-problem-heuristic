@@ -5,18 +5,19 @@
 //
 // Pré-requisitos (ajuste se necessário):
 //   - Corners2d::getEnvelopeArea static, retornando long long e tratando vetor vazio (W*H)
-//   - Corners3d::getEnvelopeVolume(const vector<Package>&, const vector<Package>&, int W, int H, int D)
+//   - Corners3d::getEnvelopeVolume(const vector<Package>&, const vector<Package>&, ll W, ll H, ll D)
 //   - Package com campos: position (Coordinates3d), l (x), a (y), c (z)
 //     Se o seu Package tiver construtor próprio, altere apenas makePackage().
 
 #include "Corners3d.h"
 #include <iostream>
 #include <vector>
+#include "../src/Types.h"
 
 using namespace std;
 
-static int failures = 0;
-static int total = 0;
+static ll failures = 0;
+static ll total = 0;
 
 #define CHECK_EQ(actual, expected, name)                                          \
     do {                                                                          \
@@ -32,7 +33,7 @@ static int total = 0;
     } while (0)
 
 // Cria um pacote com canto (x,y,z) e dimensões l (x), a (y), c (z)
-static Package makePackage(int x, int y, int z, int l, int a, int c)
+static Package makePackage(ll x, ll y, ll z, ll l, ll a, ll c)
 {
     Package p;
     p.position = Coordinates3d(x, y, z);
@@ -107,7 +108,7 @@ static void testDepthBreak()
     CHECK_EQ(v, 200, "break por profundidade (termo final do paper)");
 }
 
-// 7. Remoção de corner points: restante com l=7 não cabe ao lado da caixa
+// 7. Remoção de corner polls: restante com l=7 não cabe ao lado da caixa
 //    (4+7 > 10), só sobra o corner (0,5) -> área do envelope = 10*5 = 50
 //    volume = 6 * 50 = 300
 static void testCornerRemoval()
@@ -116,7 +117,7 @@ static void testCornerRemoval()
     inserted.push_back(makePackage(0, 0, 0, 4, 5, 6));
     vector<Package> remaining(1, makePackage(0, 0, 0, 7, 1, 1));
     long long v = Corners3d::getEnvelopeVolume(inserted, remaining, 10, 10, 10);
-    CHECK_EQ(v, 300, "remoção de corner points inviáveis");
+    CHECK_EQ(v, 300, "remoção de corner polls inviáveis");
 }
 
 // 8. Independência da ordem de entrada das caixas colocadas
