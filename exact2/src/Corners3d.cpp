@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "Types.h"
 
-vector<Coordinates3d> Corners3d::getValidCorners(vector<Package> insertedPackages, vector<Package> Packages, ll W, ll H, ll D)
+vector<Coordinates3d> Corners3d::getValidCorners(vector<Package> &insertedPackages, vector<Package> &Packages, ll W, ll H, ll D)
 {
     if(insertedPackages.empty())
     {
@@ -26,7 +26,7 @@ vector<Coordinates3d> Corners3d::getValidCorners(vector<Package> insertedPackage
     set<ll> T_aux;
     vector<ll> T;
     T.push_back(0);
-    for(auto p:insertedPackages)
+    for(const auto &p:insertedPackages)
     {
         if(T_aux.find(p.position.z + p.c) == T_aux.end())
         {
@@ -44,7 +44,7 @@ vector<Coordinates3d> Corners3d::getValidCorners(vector<Package> insertedPackage
         if(z + minD > D) break; // nenhuma caixa restante cabe daqui pra frente
 
         vector<Package> subInsertedPackages; 
-        for(Package p:insertedPackages)
+        for(const Package &p:insertedPackages)
         {
             if(p.position.z + p.c > z)
             {

@@ -20,8 +20,8 @@ using namespace std;
 class Corners2d
 {
     public:
-    static vector<Coordinates2d> getValidCorners(vector<Package> insertedPackages, vector<Package> Packages, ll W, ll H);
-    static ll getEnvelopeArea(vector<Coordinates2d> polls, ll W, ll H);
+    static vector<Coordinates2d> getValidCorners(const vector<Package> &insertedPackages, const vector<Package> &packages, ll W, ll H);
+    static ll getEnvelopeArea(vector<Coordinates2d> &polls, ll W, ll H);
 };
 
 #endif /* CORNERS2D_H */

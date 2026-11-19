@@ -7,7 +7,7 @@
 using namespace std;
 
 // não esquecer de ordenar os pacotes certo
-vector<Coordinates2d> Corners2d::getValidCorners(vector<Package> insertedPackages, vector<Package> packages, ll W, ll H)
+vector<Coordinates2d> Corners2d::getValidCorners(const vector<Package> &insertedPackages, const vector<Package> &packages, ll W, ll H)
 {
     if(insertedPackages.empty())
     {
@@ -21,7 +21,7 @@ vector<Coordinates2d> Corners2d::getValidCorners(vector<Package> insertedPackage
 
     for(ll i=0; i<insertedPackages.size(); i++)
     {
-        Package package = insertedPackages[i];
+        const Package &package = insertedPackages[i];
         Coordinates2d position = Coordinates2d(package.position.x, package.position.y);
 
         if(position.x + package.l > x)
@@ -74,7 +74,7 @@ vector<Coordinates2d> Corners2d::getValidCorners(vector<Package> insertedPackage
     return validCorners;
 };
 
-ll Corners2d::getEnvelopeArea(vector<Coordinates2d> polls, ll W, ll H)
+ll Corners2d::getEnvelopeArea(vector<Coordinates2d> &polls, ll W, ll H)
 {
 
     if(polls.empty())
