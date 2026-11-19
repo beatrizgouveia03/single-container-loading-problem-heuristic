@@ -32,15 +32,21 @@ vector<Coordinates2d> Corners2d::getValidCorners(vector<Package> insertedPackage
 
     // corner points
     set<Coordinates2d> cornerPoints;
+    vector<Coordinates2d> cp;
 
     cornerPoints.insert(Coordinates2d(0, extremeBoxes[0].position.y + extremeBoxes[0].a)); // ponto colado na parede y
+    cp.push_back(Coordinates2d(0, extremeBoxes[0].position.y + extremeBoxes[0].a));
     for(int i=1; i<extremeBoxes.size(); i++)
     {
         auto behindX = extremeBoxes[i-1].position.x + extremeBoxes[i-1].l; // x do ponto estremo anterior 
         auto currentY = extremeBoxes[i].position.y + extremeBoxes[i].a; // y do ponto estremo atual
-        cornerPoints.insert(Coordinates2d(behindX, currentY));
+        if(cornerPoints.find(Coordinates2d(behindX, currentY)) == cornerPoints.end())
+        {
+            cornerPoints.insert(Coordinates2d(behindX, currentY));
+            cp.push_back(Coordinates2d(behindX, currentY));
+        }
     }
-    cornerPoints.insert(Coordinates2d(extremeBoxes.back().position.x + extremeBoxes.back().l, 0)); // ponto colado na parede x
+    cp.push_back(Coordinates2d(Coordinates2d(extremeBoxes.back().position.x + extremeBoxes.back().l, 0)));
 
     // remover pontos onde nenhuma caixa restante cabe
     vector<Coordinates2d> validCorners;
@@ -56,7 +62,7 @@ vector<Coordinates2d> Corners2d::getValidCorners(vector<Package> insertedPackage
         minA = min(minA, p.a);
     }
 
-    for(const Coordinates2d& c : cornerPoints)
+    for(const Coordinates2d& c : cp)
     {
         if(c.x + minL > W || c.y + minA > H)
             continue; // nem a menor caixa cabe aqui
@@ -66,3 +72,19 @@ vector<Coordinates2d> Corners2d::getValidCorners(vector<Package> insertedPackage
 
     return validCorners;
 };
+
+int Corners2d::getEnvelopeArea(vector<Coordinates2d> points, int W, int H)
+{
+
+    if(points.empty())
+        return W * H;
+
+    int area = 0;
+    area += (points[0].x * H) + (W - points.back().x) * points.back().y;
+    
+    for(int i=1; i<points.size(); i++)
+    {
+        area += (points[i].x - points[i-1].x) * points[i-1].y;
+    }
+    return area;
+}

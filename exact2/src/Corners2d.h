@@ -19,6 +19,7 @@ class Corners2d
 {
     public:
     static vector<Coordinates2d> getValidCorners(vector<Package> insertedPackages, vector<Package> Packages, int W, int H);
+    static int getEnvelopeArea(vector<Coordinates2d> points, int W, int H);
 };
 
 #endif /* CORNERS2D_H */

@@ -13,4 +13,6 @@ public:
     static vector<Coordinates3d> getValidCorners(vector<Package> insertedPackages,
                                                  vector<Package> Packages,
                                                  int W, int H, int D);
+
+    static long long getEnvelopeVolume(const vector<Package>& insertedPackages, const vector<Package>& Packages, int W, int H, int D);
 };
