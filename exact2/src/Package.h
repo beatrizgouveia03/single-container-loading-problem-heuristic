@@ -1,11 +1,9 @@
 #ifndef PACKAGE_H
 #define PACKAGE_H
 
-#include <set>
-#include <tuple>
 #include <vector>
 #include <tuple>
-#include "Coordinates2d.cpp"
+#include "Coordinates3d.h"
 
 using namespace std;
 
@@ -13,7 +11,7 @@ struct Package {
   int id;
   int c, l, a;
   int volume;
-  Coordinates2d position;
+  Coordinates3d position;
   int ori_c = 0, ori_l = 0, ori_a = 0;
   bool allocated = false;
   int quantity;

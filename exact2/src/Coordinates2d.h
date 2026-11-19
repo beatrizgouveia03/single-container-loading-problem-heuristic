@@ -1,3 +1,4 @@
+#pragma once
 struct Coordinates2d
 {
     int x,y;

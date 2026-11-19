@@ -10,15 +10,15 @@
 #define CORNERS2D_H
 
 #include <vector>
-#include <tuple>
 #include "Package.h"
+#include "Coordinates2d.h"
 
 using namespace std;
 
 class Corners2d
 {
     public:
-    vector<Coordinates2d> getValidCorners(vector<Package> insertedPackages, vector<Package> Packages, int W, int H);
+    static vector<Coordinates2d> getValidCorners(vector<Package> insertedPackages, vector<Package> Packages, int W, int H);
 };
 
 #endif /* CORNERS2D_H */

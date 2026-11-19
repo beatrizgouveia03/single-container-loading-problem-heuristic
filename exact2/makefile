@@ -5,28 +5,36 @@ SRC_DIR   := src
 TEST_DIR  := test
 BUILD_DIR := build
 
-TARGET := $(BUILD_DIR)/test_corners2d
+LIB_SRCS := $(SRC_DIR)/Corners2d.cpp \
+            $(SRC_DIR)/Corners3d.cpp \
+            $(SRC_DIR)/Package.cpp
+			
+LIB_OBJS := $(patsubst %.cpp,$(BUILD_DIR)/%.o,$(LIB_SRCS))
 
-SRCS := $(SRC_DIR)/Coordinates2d.cpp \
-        $(SRC_DIR)/Corners2d.cpp \
-        $(SRC_DIR)/Package.cpp \
-        $(TEST_DIR)/test_corners2d.cpp
+TEST2D := $(BUILD_DIR)/test_corners2d
+TEST3D := $(BUILD_DIR)/test_corners3d
 
-OBJS := $(patsubst %.cpp,$(BUILD_DIR)/%.o,$(SRCS))
+.PHONY: all run run2d run3d clean
 
-.PHONY: all run clean
+all: $(TEST2D) $(TEST3D)
 
-all: $(TARGET)
+$(TEST2D): $(LIB_OBJS) $(BUILD_DIR)/$(TEST_DIR)/test_corners2d.o
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
-$(TARGET): $(OBJS)
+$(TEST3D): $(LIB_OBJS) $(BUILD_DIR)/$(TEST_DIR)/test_corners3d.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-run: $(TARGET)
-	./$(TARGET)
+run: run2d run3d
+
+run2d: $(TEST2D)
+	./$(TEST2D)
+
+run3d: $(TEST3D)
+	./$(TEST3D)
 
 clean:
 	rm -rf $(BUILD_DIR)

@@ -1,4 +1,5 @@
 #include "Corners2d.h"
+#include "Coordinates2d.h"
 #include <set>
 #include <algorithm>
 
@@ -20,7 +21,7 @@ vector<Coordinates2d> Corners2d::getValidCorners(vector<Package> insertedPackage
     for(int i=0; i<insertedPackages.size(); i++)
     {
         Package package = insertedPackages[i];
-        Coordinates2d position = package.position;
+        Coordinates2d position = Coordinates2d(package.position.x, package.position.y);
 
         if(position.x + package.l > x)
         {

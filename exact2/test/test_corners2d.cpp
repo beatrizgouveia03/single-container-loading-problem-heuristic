@@ -14,7 +14,7 @@ static int failures = 0;
 static Package makePackage(int x, int y, int l, int a)
 {
     Package p;
-    p.position = Coordinates2d(x, y);
+    p.position = Coordinates3d(x, y, 0);
     p.l = l;
     p.a = a;
     return p;

@@ -1,4 +1,5 @@
 #include "Package.h"
+#include <set>
 
 Package::Package(int _c, int _l, int _a) 
 {
@@ -8,7 +9,7 @@ Package::Package(int _c, int _l, int _a)
   volume = c * l * a;
 }
 
-Package::Package() : l(0), a(0), position(0, 0) {}
+Package::Package() : c(0), l(0), a(0), position(0, 0, 0) {}
 
 std::vector<std::tuple<int, int, int>> Package::get_valid_orientations() {
   std::set<std::tuple<int, int, int>> orientations = {
