@@ -1,0 +1,329 @@
+{
+    "container": [
+        10,
+        8,
+        8
+    ],
+    "grupo": "f36_24_3",
+    "iteracao": 1,
+    "max": 6,
+    "max_qtd": 1,
+    "min": 3,
+    "min_qtd": 1,
+    "packages": [
+        [
+            4,
+            4,
+            4
+        ],
+        [
+            5,
+            4,
+            4
+        ],
+        [
+            5,
+            4,
+            4
+        ],
+        [
+            3,
+            5,
+            4
+        ],
+        [
+            4,
+            3,
+            6
+        ],
+        [
+            3,
+            4,
+            5
+        ],
+        [
+            3,
+            5,
+            6
+        ],
+        [
+            6,
+            6,
+            6
+        ],
+        [
+            6,
+            3,
+            3
+        ],
+        [
+            3,
+            3,
+            6
+        ],
+        [
+            6,
+            3,
+            3
+        ],
+        [
+            3,
+            3,
+            5
+        ],
+        [
+            6,
+            3,
+            3
+        ],
+        [
+            4,
+            3,
+            6
+        ],
+        [
+            6,
+            6,
+            5
+        ],
+        [
+            5,
+            6,
+            5
+        ],
+        [
+            6,
+            5,
+            5
+        ],
+        [
+            3,
+            3,
+            3
+        ],
+        [
+            5,
+            5,
+            3
+        ],
+        [
+            3,
+            5,
+            6
+        ],
+        [
+            5,
+            5,
+            6
+        ],
+        [
+            6,
+            3,
+            6
+        ],
+        [
+            4,
+            3,
+            5
+        ],
+        [
+            4,
+            4,
+            5
+        ]
+    ],
+    "tipos": [
+        {
+            "dimensoes": [
+                4,
+                4,
+                4
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                5,
+                4,
+                4
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                5,
+                4,
+                4
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                3,
+                5,
+                4
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                4,
+                3,
+                6
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                3,
+                4,
+                5
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                3,
+                5,
+                6
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                6,
+                6,
+                6
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                6,
+                3,
+                3
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                3,
+                3,
+                6
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                6,
+                3,
+                3
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                3,
+                3,
+                5
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                6,
+                3,
+                3
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                4,
+                3,
+                6
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                6,
+                6,
+                5
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                5,
+                6,
+                5
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                6,
+                5,
+                5
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                3,
+                3,
+                3
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                5,
+                5,
+                3
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                3,
+                5,
+                6
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                5,
+                5,
+                6
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                6,
+                3,
+                6
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                4,
+                3,
+                5
+            ],
+            "quantidade": 1
+        },
+        {
+            "dimensoes": [
+                4,
+                4,
+                5
+            ],
+            "quantidade": 1
+        }
+    ]
+}
