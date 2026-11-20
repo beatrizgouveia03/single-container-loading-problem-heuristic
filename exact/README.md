@@ -1,6 +1,6 @@
 # Algoritmo exato para o PCumC (exact2)
 
-Implementação do branch-and-bound para o Problema de Carregamento em um Único Contêiner, baseada em Martello, Pisinger e Vigo (3D-BPP). Este guia explica como compilar o projeto e reproduzir os resultados do relatório.
+Implementação do branch-and-bound para o Problema de Carregamento em um Único Contêiner. Este guia explica como compilar o projeto e reproduzir os resultados do relatório.
 
 ## Requisitos
 
